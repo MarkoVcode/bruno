@@ -1,0 +1,483 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - '*'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-linux:
+    name: Build Linux Packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: false
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends rpm libarchive-tools libfuse2
+
+      - name: Install node dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build shared libraries
+        run: |
+          npm run build --workspace=packages/bruno-common
+          npm run build --workspace=packages/bruno-query
+          npm run sandbox:bundle-libraries --workspace=packages/bruno-js
+          npm run build --workspace=packages/bruno-converters
+          npm run build --workspace=packages/bruno-requests
+          npm run build --workspace=packages/bruno-filestore
+
+      - name: Build web application
+        run: npm run build:web
+
+      - name: Prepare Electron web assets
+        run: |
+          node <<'NODE'
+          const fs = require('fs-extra');
+          const path = require('path');
+
+          async function removeMaps(dir) {
+            if (!(await fs.pathExists(dir))) return;
+            const entries = await fs.readdir(dir);
+            for (const entry of entries) {
+              const filePath = path.join(dir, entry);
+              const stat = await fs.stat(filePath);
+              if (stat.isDirectory()) {
+                await removeMaps(filePath);
+              } else if (entry.endsWith('.map')) {
+                await fs.remove(filePath);
+              }
+            }
+          }
+
+          async function main() {
+            const outDir = 'packages/bruno-electron/out';
+            const webDir = 'packages/bruno-electron/web';
+            await fs.remove(outDir);
+            await fs.remove(webDir);
+            await fs.ensureDir(webDir);
+            await fs.copy('packages/bruno-app/dist', webDir);
+
+            const htmlEntries = await fs.readdir(webDir);
+            for (const entry of htmlEntries) {
+              if (entry.endsWith('.html')) {
+                const filePath = path.join(webDir, entry);
+                let content = await fs.readFile(filePath, 'utf8');
+                content = content.replace(/\/static/g, './static');
+                await fs.writeFile(filePath, content);
+              }
+            }
+
+            const cssDir = path.join(webDir, 'static', 'css');
+            if (await fs.pathExists(cssDir)) {
+              const cssFiles = await fs.readdir(cssDir);
+              for (const cssFile of cssFiles) {
+                if (cssFile.endsWith('.css')) {
+                  const cssPath = path.join(cssDir, cssFile);
+                  let content = await fs.readFile(cssPath, 'utf8');
+                  content = content.replace(/\/static\/font/g, '../../static/font');
+                  await fs.writeFile(cssPath, content);
+                }
+              }
+            }
+
+            await removeMaps(webDir);
+          }
+
+          main().catch((err) => {
+            console.error(err);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Package for Linux
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          npm run dist:linux --workspace=packages/bruno-electron -- --linux AppImage --linux deb --linux rpm
+
+      - name: List artifacts
+        run: ls -R packages/bruno-electron/out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bruno-linux
+          path: packages/bruno-electron/out/*
+          if-no-files-found: error
+
+  build-windows:
+    name: Build Windows Packages
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: false
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install node dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build shared libraries
+        run: |
+          npm run build --workspace=packages/bruno-common
+          npm run build --workspace=packages/bruno-query
+          npm run sandbox:bundle-libraries --workspace=packages/bruno-js
+          npm run build --workspace=packages/bruno-converters
+          npm run build --workspace=packages/bruno-requests
+          npm run build --workspace=packages/bruno-filestore
+
+      - name: Build web application
+        run: npm run build:web
+
+      - name: Prepare Electron web assets
+        run: |
+          node <<'NODE'
+          const fs = require('fs-extra');
+          const path = require('path');
+
+          async function removeMaps(dir) {
+            if (!(await fs.pathExists(dir))) return;
+            const entries = await fs.readdir(dir);
+            for (const entry of entries) {
+              const filePath = path.join(dir, entry);
+              const stat = await fs.stat(filePath);
+              if (stat.isDirectory()) {
+                await removeMaps(filePath);
+              } else if (entry.endsWith('.map')) {
+                await fs.remove(filePath);
+              }
+            }
+          }
+
+          async function main() {
+            const outDir = 'packages/bruno-electron/out';
+            const webDir = 'packages/bruno-electron/web';
+            await fs.remove(outDir);
+            await fs.remove(webDir);
+            await fs.ensureDir(webDir);
+            await fs.copy('packages/bruno-app/dist', webDir);
+
+            const htmlEntries = await fs.readdir(webDir);
+            for (const entry of htmlEntries) {
+              if (entry.endsWith('.html')) {
+                const filePath = path.join(webDir, entry);
+                let content = await fs.readFile(filePath, 'utf8');
+                content = content.replace(/\/static/g, './static');
+                await fs.writeFile(filePath, content);
+              }
+            }
+
+            const cssDir = path.join(webDir, 'static', 'css');
+            if (await fs.pathExists(cssDir)) {
+              const cssFiles = await fs.readdir(cssDir);
+              for (const cssFile of cssFiles) {
+                if (cssFile.endsWith('.css')) {
+                  const cssPath = path.join(cssDir, cssFile);
+                  let content = await fs.readFile(cssPath, 'utf8');
+                  content = content.replace(/\/static\/font/g, '../../static/font');
+                  await fs.writeFile(cssPath, content);
+                }
+              }
+            }
+
+            await removeMaps(webDir);
+          }
+
+          main().catch((err) => {
+            console.error(err);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Package for Windows
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run dist:win --workspace=packages/bruno-electron
+
+      - name: List artifacts
+        run: ls -R packages/bruno-electron/out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bruno-windows
+          path: packages/bruno-electron/out/*
+          if-no-files-found: error
+
+  build-macos-x64:
+    name: Build macOS (Intel)
+    runs-on: macos-13
+    permissions:
+      contents: read
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: false
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install node dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build shared libraries
+        run: |
+          npm run build --workspace=packages/bruno-common
+          npm run build --workspace=packages/bruno-query
+          npm run sandbox:bundle-libraries --workspace=packages/bruno-js
+          npm run build --workspace=packages/bruno-converters
+          npm run build --workspace=packages/bruno-requests
+          npm run build --workspace=packages/bruno-filestore
+
+      - name: Build web application
+        run: npm run build:web
+
+      - name: Prepare Electron web assets
+        run: |
+          node <<'NODE'
+          const fs = require('fs-extra');
+          const path = require('path');
+
+          async function removeMaps(dir) {
+            if (!(await fs.pathExists(dir))) return;
+            const entries = await fs.readdir(dir);
+            for (const entry of entries) {
+              const filePath = path.join(dir, entry);
+              const stat = await fs.stat(filePath);
+              if (stat.isDirectory()) {
+                await removeMaps(filePath);
+              } else if (entry.endsWith('.map')) {
+                await fs.remove(filePath);
+              }
+            }
+          }
+
+          async function main() {
+            const outDir = 'packages/bruno-electron/out';
+            const webDir = 'packages/bruno-electron/web';
+            await fs.remove(outDir);
+            await fs.remove(webDir);
+            await fs.ensureDir(webDir);
+            await fs.copy('packages/bruno-app/dist', webDir);
+
+            const htmlEntries = await fs.readdir(webDir);
+            for (const entry of htmlEntries) {
+              if (entry.endsWith('.html')) {
+                const filePath = path.join(webDir, entry);
+                let content = await fs.readFile(filePath, 'utf8');
+                content = content.replace(/\/static/g, './static');
+                await fs.writeFile(filePath, content);
+              }
+            }
+
+            const cssDir = path.join(webDir, 'static', 'css');
+            if (await fs.pathExists(cssDir)) {
+              const cssFiles = await fs.readdir(cssDir);
+              for (const cssFile of cssFiles) {
+                if (cssFile.endswith('.css')) {
+                  const cssPath = path.join(cssDir, cssFile);
+                  let content = await fs.readFile(cssPath, 'utf8');
+                  content = content.replace(/\/static\/font/g, '../../static/font');
+                  await fs.writeFile(cssPath, content);
+                }
+              }
+            }
+
+            await removeMaps(webDir);
+          }
+
+          main().catch((err) => {
+            console.error(err);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Package for macOS (Intel)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+        run: npm run dist:mac --workspace=packages/bruno-electron -- --x64
+
+      - name: List artifacts
+        run: ls -R packages/bruno-electron/out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bruno-macos-x64
+          path: packages/bruno-electron/out/*
+          if-no-files-found: error
+
+  build-macos-arm64:
+    name: Build macOS (Apple Silicon)
+    runs-on: macos-14
+    permissions:
+      contents: read
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: false
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install node dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build shared libraries
+        run: |
+          npm run build --workspace=packages/bruno-common
+          npm run build --workspace=packages/bruno-query
+          npm run sandbox:bundle-libraries --workspace=packages/bruno-js
+          npm run build --workspace=packages/bruno-converters
+          npm run build --workspace=packages/bruno-requests
+          npm run build --workspace=packages/bruno-filestore
+
+      - name: Build web application
+        run: npm run build:web
+
+      - name: Prepare Electron web assets
+        run: |
+          node <<'NODE'
+          const fs = require('fs-extra');
+          const path = require('path');
+
+          async function removeMaps(dir) {
+            if (!(await fs.pathExists(dir))) return;
+            const entries = await fs.readdir(dir);
+            for (const entry of entries) {
+              const filePath = path.join(dir, entry);
+              const stat = await fs.stat(filePath);
+              if (stat.isDirectory()) {
+                await removeMaps(filePath);
+              } else if (entry.endsWith('.map')) {
+                await fs.remove(filePath);
+              }
+            }
+          }
+
+          async function main() {
+            const outDir = 'packages/bruno-electron/out';
+            const webDir = 'packages/bruno-electron/web';
+            await fs.remove(outDir);
+            await fs.remove(webDir);
+            await fs.ensureDir(webDir);
+            await fs.copy('packages/bruno-app/dist', webDir);
+
+            const htmlEntries = await fs.readdir(webDir);
+            for (const entry of htmlEntries) {
+              if (entry.endsWith('.html')) {
+                const filePath = path.join(webDir, entry);
+                let content = await fs.readFile(filePath, 'utf8');
+                content = content.replace(/\/static/g, './static');
+                await fs.writeFile(filePath, content);
+              }
+            }
+
+            const cssDir = path.join(webDir, 'static', 'css');
+            if (await fs.pathExists(cssDir)) {
+              const cssFiles = await fs.readdir(cssDir);
+              for (const cssFile of cssFiles) {
+                if (cssFile.endsWith('.css')) {
+                  const cssPath = path.join(cssDir, cssFile);
+                  let content = await fs.readFile(cssPath, 'utf8');
+                  content = content.replace(/\/static\/font/g, '../../static/font');
+                  await fs.writeFile(cssPath, content);
+                }
+              }
+            }
+
+            await removeMaps(webDir);
+          }
+
+          main().catch((err) => {
+            console.error(err);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Package for macOS (Apple Silicon)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+        run: npm run dist:mac --workspace=packages/bruno-electron -- --arm64
+
+      - name: List artifacts
+        run: ls -R packages/bruno-electron/out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bruno-macos-arm64
+          path: packages/bruno-electron/out/*
+          if-no-files-found: error
+
+  publish-release:
+    name: Create GitHub Release
+    needs:
+      - build-linux
+      - build-windows
+      - build-macos-x64
+      - build-macos-arm64
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+          merge-multiple: true
+
+      - name: List release contents
+        run: ls -R release-artifacts
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          files: release-artifacts/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
