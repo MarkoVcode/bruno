@@ -90,32 +90,31 @@ jobs:
           });
 
           updateFile('packages/bruno-app/src/components/StatusBar/index.js', (content) => {
-            if (content.includes('releaseTag ? `v${version}/${releaseTag}`')) {
+            const releaseMarker = 'releaseTag ? `v${version}/${releaseTag}` : `v${version}`';
+            if (content.includes(releaseMarker)) {
               return content;
             }
             const anchor = '  const { version } = useApp();';
             if (!content.includes(anchor)) {
               throw new Error('Unable to find StatusBar version anchor');
             }
-            let updated = content.replace(anchor, `${anchor}\n  const releaseTag = ${JSON.stringify(tag)};`);
+            const newline = content.includes('\r\n') ? '\r\n' : '\n';
+            let updated = content.replace(anchor, `${anchor}${newline}  const releaseTag = ${JSON.stringify(tag)};`);
 
-            const originalBlock = [
-              '            <div className="status-bar-version">',
-              '              v{version}',
-              '            </div>'
-            ].join('\n');
-
-            if (!updated.includes(originalBlock)) {
+            const versionBlockPattern = /([ \t]*)<div className="status-bar-version">\r?\n\1  v\{version\}\r?\n\1<\/div>/;
+            if (!versionBlockPattern.test(updated)) {
               throw new Error('Unable to locate StatusBar version markup');
             }
 
-            const replacementBlock = [
-              '            <div className="status-bar-version">',
-              '              {releaseTag ? `v${version}/${releaseTag}` : `v${version}`}',
-              '            </div>'
-            ].join('\n');
+            updated = updated.replace(versionBlockPattern, (_, indent) => {
+              return [
+                `${indent}<div className="status-bar-version">`,
+                `${indent}  {${releaseMarker}}`,
+                `${indent}</div>`
+              ].join(newline);
+            });
 
-            return updated.replace(originalBlock, replacementBlock);
+            return updated;
           });
 
           if (!tag) {
