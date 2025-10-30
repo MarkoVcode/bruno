@@ -37,6 +37,7 @@ const registerNetworkIpc = require('./ipc/network');
 const registerCollectionsIpc = require('./ipc/collection');
 const registerFilesystemIpc = require('./ipc/filesystem');
 const registerPreferencesIpc = require('./ipc/preferences');
+const registerSystemMonitorIpc = require('./ipc/system-monitor');
 const collectionWatcher = require('./app/collection-watcher');
 const { loadWindowState, saveBounds, saveMaximized } = require('./utils/window');
 const registerNotificationsIpc = require('./ipc/notifications');
@@ -210,9 +211,6 @@ app.on('ready', async () => {
     mainWindow.webContents.send('main:app-loaded', {
       isRunningInRosetta: getIsRunningInRosetta()
     });
-
-    // Start system monitoring for FileSync
-    systemMonitor.start(mainWindow);
   });
 
   // register all ipc handlers
@@ -223,6 +221,7 @@ app.on('ready', async () => {
   registerNotificationsIpc(mainWindow, collectionWatcher);
   registerFilesystemIpc(mainWindow);
   registerRequestHistoryIpc(mainWindow);
+  registerSystemMonitorIpc(mainWindow, systemMonitor);
 });
 
 // Quit the app once all windows are closed
