@@ -8,6 +8,8 @@ const packageJson = require('./package.json');
 const alias = require('@rollup/plugin-alias');
 const path = require('path');
 
+const shouldMinify = process.env.ENABLE_MINIFY === 'true';
+
 module.exports = [
   {
     input: 'src/index.js',
@@ -30,7 +32,7 @@ module.exports = [
         extensions: ['.js', '.css'] // Resolve .js files
       }),
       commonjs(),
-      terser(),
+      shouldMinify && terser({ numWorkers: 1 }),
       alias({
         entries: [{ find: 'src', replacement: path.resolve(__dirname, 'src') }]
       }),
