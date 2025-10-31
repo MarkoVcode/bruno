@@ -1,8 +1,12 @@
 require('dotenv').config({ path: process.env.DOTENV_PATH });
 
+// Support BrunoN branding for release builds
+const isBrunoNRelease = process.env.BRUNON_RELEASE === 'true';
+const productName = isBrunoNRelease ? 'BrunoN' : 'Bruno';
+
 const config = {
   appId: 'com.usebruno.app',
-  productName: 'Bruno',
+  productName: productName,
   electronVersion: '37.6.1',
   directories: {
     buildResources: 'resources',
