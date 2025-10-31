@@ -49,6 +49,7 @@ const { generateUidBasedOnHash, stringifyJson, safeParseJSON, safeStringifyJSON 
 const { moveRequestUid, deleteRequestUid } = require('../cache/requestUids');
 const { deleteCookiesForDomain, getDomainsWithCookies, addCookieForDomain, modifyCookieForDomain, parseCookieString, createCookieString, deleteCookie } = require('../utils/cookies');
 const { importCollection: importCollectionUtil } = require('../utils/collection-import');
+const { isReadOnlyCollection, getOpenapiSpec } = require('../utils/readonly-detection');
 const EnvironmentSecretsStore = require('../store/env-secrets');
 const CollectionSecurityStore = require('../store/collection-security');
 const UiStateSnapshotStore = require('../store/ui-state-snapshot');
@@ -93,6 +94,32 @@ const validatePathIsInsideCollection = (filePath, lastOpenedCollections) => {
   }
 }
 
+/**
+ * Check if a file path belongs to a read-only collection
+ * Throws an error if the collection is read-only
+ */
+const checkReadOnlyCollection = (pathname, lastOpenedCollections) => {
+  const openCollectionPaths = collectionWatcher.getAllWatcherPaths();
+  const lastOpenedPaths = lastOpenedCollections ? lastOpenedCollections.getAll() : [];
+  const allCollectionPaths = [...new Set([...openCollectionPaths, ...lastOpenedPaths])];
+
+  // Find the collection path that contains this file
+  const collectionPath = allCollectionPaths.find((collectionPath) => {
+    return pathname.startsWith(collectionPath + path.sep) || pathname === collectionPath;
+  });
+
+  if (collectionPath) {
+    // Read bruno.json to get collection name
+    const brunoJsonPath = path.join(collectionPath, 'bruno.json');
+    if (fs.existsSync(brunoJsonPath)) {
+      const brunoConfig = JSON.parse(fs.readFileSync(brunoJsonPath, 'utf8'));
+      if (isReadOnlyCollection(collectionPath, brunoConfig.name)) {
+        throw new Error('Cannot modify a read-only collection. This collection is synced with openapi.yaml.');
+      }
+    }
+  }
+};
+
 const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollections) => {
   // create collection
   ipcMain.handle(
@@ -131,6 +158,10 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
         brunoConfig.size = size;
         brunoConfig.filesCount = filesCount;
 
+        // Detect if collection is read-only (OpenAPI-sourced)
+        const readOnly = isReadOnlyCollection(dirPath, brunoConfig.name);
+        brunoConfig.readOnly = readOnly;
+
         mainWindow.webContents.send('main:collection-opened', dirPath, uid, brunoConfig);
         ipcMain.emit('main:collection-opened', mainWindow, dirPath, uid, brunoConfig);
       } catch (error) {
@@ -163,10 +194,32 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
       // Change new name of collection
       let brunoConfig = JSON.parse(content);
       brunoConfig.name = collectionName;
+
+      // Copy openapi.yaml if it exists in the source collection
+      const openapiSourcePath = path.join(previousPath, 'openapi.yaml');
+      const hasOpenApi = fs.existsSync(openapiSourcePath);
+
+      if (hasOpenApi) {
+        // Ensure openapi files are in ignore list
+        brunoConfig.ignore = brunoConfig.ignore || [];
+        if (!brunoConfig.ignore.includes('openapi.yaml')) {
+          brunoConfig.ignore.push('openapi.yaml');
+        }
+        if (!brunoConfig.ignore.includes('openapi.json')) {
+          brunoConfig.ignore.push('openapi.json');
+        }
+      }
+
       const cont = await stringifyJson(brunoConfig);
 
       // write the bruno.json to new dir
       await writeFile(path.join(dirPath, 'bruno.json'), cont);
+
+      // Copy the openapi.yaml file
+      if (hasOpenApi) {
+        const openapiDestPath = path.join(dirPath, 'openapi.yaml');
+        fs.copyFileSync(openapiSourcePath, openapiDestPath);
+      }
 
       // Now copy all the files with extension name .bru along with the dir
       const files = searchForBruFiles(previousPath);
@@ -185,13 +238,19 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
       brunoConfig.size = size;
       brunoConfig.filesCount = filesCount;
 
+      // Detect if collection is read-only (OpenAPI-sourced)
+      const readOnly = isReadOnlyCollection(dirPath, brunoConfig.name);
+      brunoConfig.readOnly = readOnly;
+
       mainWindow.webContents.send('main:collection-opened', dirPath, uid, brunoConfig);
-      ipcMain.emit('main:collection-opened', mainWindow, dirPath, uid);
+      ipcMain.emit('main:collection-opened', mainWindow, dirPath, uid, brunoConfig);
     }
   );
   // rename collection
   ipcMain.handle('renderer:rename-collection', async (event, newName, collectionPathname) => {
     try {
+      checkReadOnlyCollection(collectionPathname, lastOpenedCollections);
+
       const brunoJsonFilePath = path.join(collectionPathname, 'bruno.json');
       const content = fs.readFileSync(brunoJsonFilePath, 'utf8');
       const json = JSON.parse(content);
@@ -251,6 +310,7 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
         throw new Error(`${request.filename}.bru is not a valid filename`);
       }
       validatePathIsInsideCollection(pathname, lastOpenedCollections);
+      checkReadOnlyCollection(pathname, lastOpenedCollections);
       const content = await stringifyRequestViaWorker(request);
       await writeFile(pathname, content);
     } catch (error) {
@@ -265,6 +325,7 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
         throw new Error(`path: ${pathname} does not exist`);
       }
 
+      checkReadOnlyCollection(pathname, lastOpenedCollections);
       const content = await stringifyRequestViaWorker(request);
       await writeFile(pathname, content);
     } catch (error) {
@@ -283,6 +344,7 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
           throw new Error(`path: ${pathname} does not exist`);
         }
 
+        checkReadOnlyCollection(pathname, lastOpenedCollections);
         const content = await stringifyRequestViaWorker(request);
         await writeFile(pathname, content);
       }
@@ -391,6 +453,8 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
       if (!fs.existsSync(itemPath)) {
         throw new Error(`path: ${itemPath} does not exist`);
       }
+
+      checkReadOnlyCollection(itemPath, lastOpenedCollections);
 
       if (isDirectory(itemPath)) {
         const folderBruFilePath = path.join(itemPath, 'folder.bru');
@@ -530,6 +594,7 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
     const resolvedFolderName = sanitizeName(path.basename(pathname));
     pathname = path.join(path.dirname(pathname), resolvedFolderName);
     try {
+      checkReadOnlyCollection(pathname, lastOpenedCollections);
       if (!fs.existsSync(pathname)) {
         fs.mkdirSync(pathname);
         const folderBruFilePath = path.join(pathname, 'folder.bru');
@@ -546,6 +611,8 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
   // delete file/folder
   ipcMain.handle('renderer:delete-item', async (event, pathname, type) => {
     try {
+      checkReadOnlyCollection(pathname, lastOpenedCollections);
+
       if (type === 'folder') {
         if (!fs.existsSync(pathname)) {
           return Promise.reject(new Error('The directory does not exist'));
@@ -876,6 +943,29 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
       return collectionSecurityStore.getSecurityConfigForCollection(collectionPath);
     } catch (error) {
       return Promise.reject(error);
+    }
+  });
+
+  // Get OpenAPI spec for API documentation
+  ipcMain.handle('renderer:get-openapi-spec', async (event, collectionPath) => {
+    try {
+      const { getOpenapiSpec } = require('../utils/readonly-detection');
+      const spec = getOpenapiSpec(collectionPath);
+      return spec;
+    } catch (error) {
+      console.error('Error getting OpenAPI spec:', error);
+      return Promise.reject(error);
+    }
+  });
+
+  // Check if collection has OpenAPI spec
+  ipcMain.handle('renderer:has-openapi-spec', async (event, collectionPath) => {
+    try {
+      const openapiPath = path.join(collectionPath, 'openapi.yaml');
+      return fs.existsSync(openapiPath);
+    } catch (error) {
+      console.error('Error checking for OpenAPI spec:', error);
+      return false;
     }
   });
 

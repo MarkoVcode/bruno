@@ -5,6 +5,7 @@ const Yup = require('yup');
 const { isDirectory, normalizeAndResolvePath, getCollectionStats } = require('../utils/filesystem');
 const { generateUidBasedOnHash } = require('../utils/common');
 const { transformBrunoConfigAfterRead } = require('../utils/transfomBrunoConfig');
+const { isReadOnlyCollection } = require('../utils/readonly-detection');
 
 // todo: bruno.json config schema validation errors must be propagated to the UI
 const configSchema = Yup.object({
@@ -97,6 +98,10 @@ const openCollection = async (win, watcher, collectionPath, options = {}) => {
       const { size, filesCount } = await getCollectionStats(collectionPath);
       brunoConfig.size = size;
       brunoConfig.filesCount = filesCount;
+
+      // Detect if collection is read-only (OpenAPI-sourced)
+      const readOnly = isReadOnlyCollection(collectionPath, brunoConfig.name);
+      brunoConfig.readOnly = readOnly;
 
       win.webContents.send('main:collection-opened', collectionPath, uid, brunoConfig);
       ipcMain.emit('main:collection-opened', win, collectionPath, uid, brunoConfig);

@@ -1,20 +1,46 @@
 import React from "react";
 import { getTotalRequestCountInCollection } from 'utils/collections/';
-import { IconFolder, IconWorld, IconApi, IconShare } from '@tabler/icons';
+import { IconFolder, IconWorld, IconApi, IconShare, IconFileCode } from '@tabler/icons';
 import { areItemsLoading, getItemsLoadStats } from "utils/collections/index";
-import { useState } from "react";
+import { useState, useEffect } from 'react';
 import ShareCollection from "components/ShareCollection/index";
+import { useDispatch } from 'react-redux';
+import { updateSettingsSelectedTab } from 'providers/ReduxStore/slices/collections';
 
 const Info = ({ collection }) => {
+  const dispatch = useDispatch();
   const totalRequestsInCollection = getTotalRequestCountInCollection(collection);
 
   const isCollectionLoading = areItemsLoading(collection);
   const { loading: itemsLoadingCount, total: totalItems } = getItemsLoadStats(collection);
   const [showShareCollectionModal, toggleShowShareCollectionModal] = useState(false);
-  
+  const [hasOpenApi, setHasOpenApi] = useState(false);
+
+  useEffect(() => {
+    const checkOpenApi = async () => {
+      try {
+        const { ipcRenderer } = window;
+        const exists = await ipcRenderer.invoke('renderer:has-openapi-spec', collection.pathname);
+        setHasOpenApi(exists);
+      } catch (error) {
+        console.error('Error checking for OpenAPI spec:', error);
+        setHasOpenApi(false);
+      }
+    };
+
+    checkOpenApi();
+  }, [collection.pathname]);
+
   const handleToggleShowShareCollectionModal = (value) => (e) => {
     toggleShowShareCollectionModal(value);
-  }
+  };
+
+  const handleOpenApiDocClick = () => {
+    dispatch(updateSettingsSelectedTab({
+      collectionUid: collection.uid,
+      tab: 'apidoc'
+    }));
+  };
 
   return (
     <div className="w-full flex flex-col h-fit">
@@ -60,6 +86,21 @@ const Info = ({ collection }) => {
               </div>
             </div>
           </div>
+
+          {/* OpenAPI Row - Show if collection has OpenAPI spec */}
+          {hasOpenApi && (
+            <div className="flex items-start group cursor-pointer" onClick={handleOpenApiDocClick}>
+              <div className="flex-shrink-0 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <IconFileCode className="w-5 h-5 text-amber-500" stroke={1.5} />
+              </div>
+              <div className="ml-4 h-full flex flex-col justify-start">
+                <div className="font-semibold text-sm h-fit my-auto">OpenAPI</div>
+                <div className="mt-1 text-sm group-hover:underline text-link">
+                  View API Documentation
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="flex items-start group cursor-pointer" onClick={handleToggleShowShareCollectionModal(true)}>
             <div className="flex-shrink-0 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">

@@ -367,24 +367,26 @@ const GrpcQueryUrl = ({ item, collection, handleRun }) => {
             <span className="infotip-text text-xs">Generate grpcurl command</span>
           </div>
 
-          <div
-            className="infotip"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (!item.draft) return;
-              onSave();
-            }}
-          >
-            <IconDeviceFloppy
-              color={item.draft ? theme.colors.text.yellow : theme.requestTabs.icon.color}
-              strokeWidth={1.5}
-              size={22}
-              className={`${item.draft ? 'cursor-pointer' : 'cursor-default'}`}
-            />  
-            <span className="infotip-text text-xs">
-              Save <span className="shortcut">({saveShortcut})</span>
-            </span>
-          </div>
+          {!collection.brunoConfig?.readOnly && (
+            <div
+              className="infotip"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!item.draft) return;
+                onSave();
+              }}
+            >
+              <IconDeviceFloppy
+                color={item.draft ? theme.colors.text.yellow : theme.requestTabs.icon.color}
+                strokeWidth={1.5}
+                size={22}
+                className={`${item.draft ? 'cursor-pointer' : 'cursor-default'}`}
+              />
+              <span className="infotip-text text-xs">
+                Save <span className="shortcut">({saveShortcut})</span>
+              </span>
+            </div>
+          )}
 
           {isConnectionActive && isStreamingMethod && (
             <div className="connection-controls relative flex items-center h-full gap-3">

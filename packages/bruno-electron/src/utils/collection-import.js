@@ -5,6 +5,7 @@ const jsyaml = require('js-yaml');
 const { sanitizeName, createDirectory, writeFile, safeWriteFileSync, getCollectionStats } = require('./filesystem');
 const { generateUidBasedOnHash, stringifyJson } = require('./common');
 const { stringifyRequestViaWorker, stringifyCollection, stringifyEnvironment, stringifyFolder } = require('@usebruno/filestore');
+const { isReadOnlyCollection } = require('./readonly-detection');
 
 /**
  * Recursively find a unique folder name by appending incremental numbers
@@ -87,16 +88,32 @@ async function importCollection(collection, collectionLocation, mainWindow, last
     }
   };
 
-  const getBrunoJsonConfig = (collection) => {
+  const getBrunoJsonConfig = (collection, hasOpenapiSpec = false) => {
     let brunoConfig = collection.brunoConfig;
 
     if (!brunoConfig) {
+      const defaultIgnore = ['node_modules', '.git'];
+
+      // Add openapi files to ignore if this is an OpenAPI-sourced collection
+      if (hasOpenapiSpec) {
+        defaultIgnore.push('openapi.yaml', 'openapi.json');
+      }
+
       brunoConfig = {
         version: '1',
         name: collection.name,
         type: 'collection',
-        ignore: ['node_modules', '.git']
+        ignore: defaultIgnore
       };
+    } else if (hasOpenapiSpec) {
+      // If brunoConfig exists, ensure openapi files are in ignore list
+      brunoConfig.ignore = brunoConfig.ignore || [];
+      if (!brunoConfig.ignore.includes('openapi.yaml')) {
+        brunoConfig.ignore.push('openapi.yaml');
+      }
+      if (!brunoConfig.ignore.includes('openapi.json')) {
+        brunoConfig.ignore.push('openapi.json');
+      }
     }
 
     return brunoConfig;
@@ -105,7 +122,7 @@ async function importCollection(collection, collectionLocation, mainWindow, last
   await createDirectory(collectionPath);
 
   const uid = generateUidBasedOnHash(collectionPath);
-  let brunoConfig = getBrunoJsonConfig(collection);
+  let brunoConfig = getBrunoJsonConfig(collection, !!openapiSpec);
   const stringifiedBrunoConfig = await stringifyJson(brunoConfig);
 
   // Write the Bruno configuration to a file
@@ -139,6 +156,10 @@ async function importCollection(collection, collectionLocation, mainWindow, last
   const { size, filesCount } = await getCollectionStats(collectionPath);
   brunoConfig.size = size;
   brunoConfig.filesCount = filesCount;
+
+  // Detect if collection is read-only (OpenAPI-sourced)
+  const readOnly = isReadOnlyCollection(collectionPath, brunoConfig.name);
+  brunoConfig.readOnly = readOnly;
 
   mainWindow.webContents.send('main:collection-opened', collectionPath, uid, brunoConfig);
   ipcMain.emit('main:collection-opened', mainWindow, collectionPath, uid, brunoConfig);

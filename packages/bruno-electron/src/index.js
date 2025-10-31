@@ -63,7 +63,9 @@ const contentSecurityPolicy = [
   // they can be used as link in the embedded markdown editors
   "img-src 'self' blob: data: http: https:",
   "media-src 'self' blob: data: https:",
-  "style-src 'self' 'unsafe-inline' https:"
+  'style-src \'self\' \'unsafe-inline\' https:',
+  // Allow web workers with blob URLs for ReDoc OpenAPI documentation
+  'worker-src \'self\' blob:'
 ];
 
 setContentSecurityPolicy(contentSecurityPolicy.join(';') + ';');

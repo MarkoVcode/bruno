@@ -4,7 +4,7 @@ import classnames from 'classnames';
 import { uuid } from 'utils/common';
 import filter from 'lodash/filter';
 import { useDrop, useDrag } from 'react-dnd';
-import { IconChevronRight, IconDots, IconLoader2 } from '@tabler/icons';
+import { IconChevronRight, IconDots, IconLoader2, IconLock } from '@tabler/icons';
 import Dropdown from 'components/Dropdown';
 import { toggleCollection, collapseFullCollection } from 'providers/ReduxStore/slices/collections';
 import { mountCollection, moveCollectionAndPersist, handleCollectionItemDrop, pasteItem } from 'providers/ReduxStore/slices/collections/actions';
@@ -263,6 +263,15 @@ const Collection = ({ collection, searchText }) => {
             onClick={handleCollectionCollapse}
             onDoubleClick={handleCollectionDoubleClick}
           />
+          {collection.brunoConfig?.readOnly && (
+            <IconLock
+              size={14}
+              strokeWidth={2}
+              className="ml-1"
+              style={{ color: 'rgb(160 160 160)', flexShrink: 0 }}
+              title="Read-only: Synced with openapi.yaml"
+            />
+          )}
           <div className="ml-1 w-full" id="sidebar-collection-name" title={collection.name}>
             {collection.name}
           </div>
@@ -270,24 +279,28 @@ const Collection = ({ collection, searchText }) => {
         </div>
         <div className="collection-actions" data-testid="collection-actions">
           <Dropdown onCreate={onMenuDropdownCreate} icon={<MenuIcon />} placement="bottom-start">
-            <div
-              className="dropdown-item"
-              onClick={(_e) => {
-                menuDropdownTippyRef.current.hide();
-                setShowNewRequestModal(true);
-              }}
-            >
-              New Request
-            </div>
-            <div
-              className="dropdown-item"
-              onClick={(_e) => {
-                menuDropdownTippyRef.current.hide();
-                setShowNewFolderModal(true);
-              }}
-            >
-              New Folder
-            </div>
+            {!collection.brunoConfig?.readOnly && (
+              <>
+                <div
+                  className="dropdown-item"
+                  onClick={(_e) => {
+                    menuDropdownTippyRef.current.hide();
+                    setShowNewRequestModal(true);
+                  }}
+                >
+                  New Request
+                </div>
+                <div
+                  className="dropdown-item"
+                  onClick={(_e) => {
+                    menuDropdownTippyRef.current.hide();
+                    setShowNewFolderModal(true);
+                  }}
+                >
+                  New Folder
+                </div>
+              </>
+            )}
             <div
               className="dropdown-item"
               data-testid="clone-collection"

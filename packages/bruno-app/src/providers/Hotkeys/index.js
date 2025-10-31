@@ -49,6 +49,12 @@ export const HotkeysProvider = (props) => {
         if (activeTab) {
           const collection = findCollectionByUid(collections, activeTab.collectionUid);
           if (collection) {
+            // Check if collection is read-only
+            if (collection.brunoConfig?.readOnly) {
+              toast.error('Cannot save changes to a read-only collection. This collection is synced with openapi.yaml.');
+              return false;
+            }
+
             const item = findItemInCollection(collection, activeTab.uid);
             if (item && item.uid) {
               if (activeTab.type === 'folder-settings') {

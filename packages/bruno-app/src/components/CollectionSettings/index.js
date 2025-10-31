@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import classnames from 'classnames';
 import get from 'lodash/get';
 import cloneDeep from 'lodash/cloneDeep';
@@ -14,6 +14,7 @@ import Script from './Script';
 import Test from './Tests';
 import Presets from './Presets';
 import Protobuf from './Protobuf';
+import ApiDoc from './ApiDoc/index-custom';
 import StyledWrapper from './StyledWrapper';
 import Vars from './Vars/index';
 import StatusDot from 'components/StatusDot';
@@ -22,6 +23,8 @@ import Overview from './Overview/index';
 const CollectionSettings = ({ collection }) => {
   const dispatch = useDispatch();
   const tab = collection.settingsSelectedTab;
+  const [hasOpenApi, setHasOpenApi] = useState(false);
+
   const setTab = (tab) => {
     dispatch(
       updateSettingsSelectedTab({
@@ -30,6 +33,22 @@ const CollectionSettings = ({ collection }) => {
       })
     );
   };
+
+  // Check for OpenAPI spec file existence
+  useEffect(() => {
+    const checkOpenApi = async () => {
+      try {
+        const { ipcRenderer } = window;
+        const exists = await ipcRenderer.invoke('renderer:has-openapi-spec', collection.pathname);
+        setHasOpenApi(exists);
+      } catch (error) {
+        console.error('Error checking for OpenAPI spec:', error);
+        setHasOpenApi(false);
+      }
+    };
+
+    checkOpenApi();
+  }, [collection.pathname]);
 
   const root = collection?.root;
   const hasScripts = root?.request?.script?.res || root?.request?.script?.req;
@@ -130,6 +149,9 @@ const CollectionSettings = ({ collection }) => {
       case 'protobuf': {
         return <Protobuf collection={collection} />;
       }
+      case 'apidoc': {
+        return <ApiDoc collection={collection} />;
+      }
     }
   };
 
@@ -181,6 +203,11 @@ const CollectionSettings = ({ collection }) => {
           Protobuf
           {protobufConfig.protoFiles && protobufConfig.protoFiles.length > 0 && <StatusDot />}
         </div>
+        {hasOpenApi && (
+          <div className={getTabClassname('apidoc')} role="tab" onClick={() => setTab('apidoc')}>
+            API Doc
+          </div>
+        )}
       </div>
       <section className="mt-4 h-full overflow-auto">{getTabPanel(tab)}</section>
     </StyledWrapper>

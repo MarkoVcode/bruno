@@ -128,25 +128,27 @@ const QueryUrl = ({ item, collection, handleRun }) => {
               Generate Code
             </span>
           </div>
-          <div
-            title="Save Request"
-            className="infotip mr-3"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (!item.draft) return;
-              onSave();
-            }}
-          >
-            <IconDeviceFloppy
-              color={item.draft ? theme.colors.text.yellow : theme.requestTabs.icon.color}
-              strokeWidth={1.5}
-              size={22}
-              className={`${item.draft ? 'cursor-pointer' : 'cursor-default'}`}
-            />
-            <span className="infotiptext text-xs">
-              Save <span className="shortcut">({saveShortcut})</span>
-            </span>
-          </div>
+          {!collection.brunoConfig?.readOnly && (
+            <div
+              title="Save Request"
+              className="infotip mr-3"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!item.draft) return;
+                onSave();
+              }}
+            >
+              <IconDeviceFloppy
+                color={item.draft ? theme.colors.text.yellow : theme.requestTabs.icon.color}
+                strokeWidth={1.5}
+                size={22}
+                className={`${item.draft ? 'cursor-pointer' : 'cursor-default'}`}
+              />
+              <span className="infotiptext text-xs">
+                Save <span className="shortcut">({saveShortcut})</span>
+              </span>
+            </div>
+          )}
           <IconArrowRight color={theme.requestTabPanel.url.icon} strokeWidth={1.5} size={22} data-testid="send-arrow-icon" />
         </div>
       </div>

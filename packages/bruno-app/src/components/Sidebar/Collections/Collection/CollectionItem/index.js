@@ -39,9 +39,15 @@ const CollectionItem = ({ item, collectionUid, collectionPathname, searchText })
 
   const _isTabForItemPresentSelector = isTabForItemPresentSelector({ itemUid: item.uid });
   const isTabForItemPresent = useSelector(_isTabForItemPresentSelector, isEqual);
-  
+
   const isSidebarDragging = useSelector((state) => state.app.isDragging);
   const { hasCopiedItems } = useSelector((state) => state.app.clipboard);
+
+  // Check if collection is read-only
+  const collection = useSelector((state) =>
+    state.collections.collections.find((c) => c.uid === collectionUid));
+  const isReadOnly = collection?.brunoConfig?.readOnly;
+
   const dispatch = useDispatch();
 
   // We use a single ref for drag and drop.
@@ -397,11 +403,20 @@ const CollectionItem = ({ item, collectionUid, collectionPathname, searchText })
               <span className="item-name" title={item.name}>
                 {item.name}
               </span>
+              {isReadOnly && (
+                <span
+                  className="ml-1 text-xs opacity-50"
+                  style={{ fontSize: '9px', color: 'rgb(160 160 160)' }}
+                  title="Read-only item"
+                >
+                  [RO]
+                </span>
+              )}
             </div>
           </div>
           <div className="menu-icon pr-2">
             <Dropdown onCreate={onDropdownCreate} icon={<MenuIcon />} placement="bottom-start">
-              {isFolder && (
+              {isFolder && !isReadOnly && (
                 <>
                   <div
                     className="dropdown-item"
@@ -497,15 +512,17 @@ const CollectionItem = ({ item, collectionUid, collectionPathname, searchText })
               >
                 Show in Folder
               </div>
-              <div
-                className="dropdown-item delete-item"
-                onClick={(e) => {
-                  dropdownTippyRef.current.hide();
-                  setDeleteItemModalOpen(true);
-                }}
-              >
-                Delete
-              </div>
+              {!isReadOnly && (
+                <div
+                  className="dropdown-item delete-item"
+                  onClick={(e) => {
+                    dropdownTippyRef.current.hide();
+                    setDeleteItemModalOpen(true);
+                  }}
+                >
+                  Delete
+                </div>
+              )}
               {isFolder && (
                 <div
                   className="dropdown-item"

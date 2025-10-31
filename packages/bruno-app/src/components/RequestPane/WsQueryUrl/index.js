@@ -104,24 +104,26 @@ const WsQueryUrl = ({ item, collection, handleRun }) => {
             onRun={handleRun}
           />
           <div className="flex items-center h-full mr-2 cursor-pointer">
-            <div
-              className="infotip mr-3"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!item.draft) return;
-                onSave();
-              }}
-            >
-              <IconDeviceFloppy
-                color={item.draft ? theme.colors.text.yellow : theme.requestTabs.icon.color}
-                strokeWidth={1.5}
-                size={22}
-                className={`${item.draft ? 'cursor-pointer' : 'cursor-default'}`}
-              />
-              <span className="infotip-text text-xs">
-                Save <span className="shortcut">({saveShortcut})</span>
-              </span>
-            </div>
+            {!collection.brunoConfig?.readOnly && (
+              <div
+                className="infotip mr-3"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!item.draft) return;
+                  onSave();
+                }}
+              >
+                <IconDeviceFloppy
+                  color={item.draft ? theme.colors.text.yellow : theme.requestTabs.icon.color}
+                  strokeWidth={1.5}
+                  size={22}
+                  className={`${item.draft ? 'cursor-pointer' : 'cursor-default'}`}
+                />
+                <span className="infotip-text text-xs">
+                  Save <span className="shortcut">({saveShortcut})</span>
+                </span>
+              </div>
+            )}
 
             {isConnectionActive && (
               <div className="connection-controls relative flex items-center h-full gap-3 mr-3">
