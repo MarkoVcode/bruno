@@ -18,6 +18,7 @@ const Welcome = () => {
   const sidebarCollapsed = useSelector((state) => state.app.sidebarCollapsed);
   const collections = useSelector((state) => state.collections.collections);
   const [importedCollection, setImportedCollection] = useState(null);
+  const [importedCollectionMeta, setImportedCollectionMeta] = useState(null); // For OpenAPI spec
   const [createCollectionModalOpen, setCreateCollectionModalOpen] = useState(false);
   const [importCollectionModalOpen, setImportCollectionModalOpen] = useState(false);
   const [importCollectionLocationModalOpen, setImportCollectionLocationModalOpen] = useState(false);
@@ -30,17 +31,22 @@ const Welcome = () => {
       });
   };
 
-  const handleImportCollection = ({ collection }) => {
+  const handleImportCollection = ({ collection, openapiSpec, openapiFormat }) => {
     setImportedCollection(collection);
+    setImportedCollectionMeta({ openapiSpec, openapiFormat });
     setImportCollectionModalOpen(false);
     setImportCollectionLocationModalOpen(true);
   };
 
   const handleImportCollectionLocation = (collectionLocation) => {
-    dispatch(importCollection(importedCollection, collectionLocation))
+    dispatch(importCollection(importedCollection,
+      collectionLocation,
+      importedCollectionMeta?.openapiSpec,
+      importedCollectionMeta?.openapiFormat))
       .then(() => {
         setImportCollectionLocationModalOpen(false);
         setImportedCollection(null);
+        setImportedCollectionMeta(null);
         toast.success(t('WELCOME.COLLECTION_IMPORT_SUCCESS'));
       })
       .catch((err) => {

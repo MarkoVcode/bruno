@@ -16,23 +16,29 @@ import { formatIpcError } from "utils/common/error";
 
 const TitleBar = () => {
   const [importedCollection, setImportedCollection] = useState(null);
+  const [importedCollectionMeta, setImportedCollectionMeta] = useState(null); // For OpenAPI spec
   const [createCollectionModalOpen, setCreateCollectionModalOpen] = useState(false);
   const [importCollectionModalOpen, setImportCollectionModalOpen] = useState(false);
   const [importCollectionLocationModalOpen, setImportCollectionLocationModalOpen] = useState(false);
   const dispatch = useDispatch();
   const { ipcRenderer } = window;
 
-  const handleImportCollection = ({ collection }) => {
+  const handleImportCollection = ({ collection, openapiSpec, openapiFormat }) => {
     setImportedCollection(collection);
+    setImportedCollectionMeta({ openapiSpec, openapiFormat });
     setImportCollectionModalOpen(false);
     setImportCollectionLocationModalOpen(true);
   };
 
   const handleImportCollectionLocation = (collectionLocation) => {
-    dispatch(importCollection(importedCollection, collectionLocation))
+    dispatch(importCollection(importedCollection,
+      collectionLocation,
+      importedCollectionMeta?.openapiSpec,
+      importedCollectionMeta?.openapiFormat))
       .then(() => {
         setImportCollectionLocationModalOpen(false);
         setImportedCollection(null);
+        setImportedCollectionMeta(null);
         toast.success('Collection imported successfully');
       })
       .catch((err) => {

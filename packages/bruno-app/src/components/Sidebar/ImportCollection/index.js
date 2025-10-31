@@ -40,6 +40,7 @@ const ImportCollection = ({ onClose, handleSubmit }) => {
   const [dragActive, setDragActive] = useState(false);
   const [showImportSettings, setShowImportSettings] = useState(false);
   const [openApiData, setOpenApiData] = useState(null);
+  const [openApiFormat, setOpenApiFormat] = useState(null); // 'json' or 'yaml'
   const [groupingType, setGroupingType] = useState('tags');
   const fileInputRef = useRef(null);
 
@@ -61,7 +62,12 @@ const ImportCollection = ({ onClose, handleSubmit }) => {
   const handleImportSettings = () => {
     try {
       const collection = convertOpenapiToBruno(openApiData, { groupBy: groupingType });
-      handleSubmit({ collection });
+      // Pass both the converted collection and the original OpenAPI spec
+      handleSubmit({
+        collection,
+        openapiSpec: openApiData,
+        openapiFormat: openApiFormat
+      });
     } catch (err) {
       console.error(err);
       toastError(err, 'Failed to process OpenAPI specification');
@@ -79,7 +85,10 @@ const ImportCollection = ({ onClose, handleSubmit }) => {
 
       // Check if it's an OpenAPI spec and show settings
       if (isOpenApiSpec(data)) {
+        // Detect file format based on file extension
+        const isJsonFile = file.name.endsWith('.json') || file.type === 'application/json';
         setOpenApiData(data);
+        setOpenApiFormat(isJsonFile ? 'json' : 'yaml');
         setIsLoading(false);
         setShowImportSettings(true);
         return;
