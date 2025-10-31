@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { ipcMain } = require('electron');
+const jsyaml = require('js-yaml');
 const { sanitizeName, createDirectory, writeFile, safeWriteFileSync, getCollectionStats } = require('./filesystem');
 const { generateUidBasedOnHash, stringifyJson } = require('./common');
 const { stringifyRequestViaWorker, stringifyCollection, stringifyEnvironment, stringifyFolder } = require('@usebruno/filestore');
@@ -21,8 +22,15 @@ async function findUniqueFolderName(baseName, collectionLocation, counter = 0) {
 
 /**
  * Import a collection - shared logic used by both IPC handler and onboarding service
+ * @param {Object} collection - The Bruno collection object
+ * @param {string} collectionLocation - Directory where collection will be created
+ * @param {Object} mainWindow - Electron main window
+ * @param {Object} lastOpenedCollections - Collection history manager
+ * @param {string|null} uniqueFolderName - Optional folder name override
+ * @param {Object|null} openapiSpec - Optional OpenAPI spec object (for read-only collections)
+ * @param {string|null} openapiFormat - Format of original spec: 'json' or 'yaml'
  */
-async function importCollection(collection, collectionLocation, mainWindow, lastOpenedCollections, uniqueFolderName = null) {
+async function importCollection(collection, collectionLocation, mainWindow, lastOpenedCollections, uniqueFolderName = null, openapiSpec = null, openapiFormat = null) {
   // Use provided unique folder name or use collection name
   let folderName = uniqueFolderName ? sanitizeName(uniqueFolderName) : sanitizeName(collection.name);
   let collectionPath = path.join(collectionLocation, folderName);
@@ -105,6 +113,28 @@ async function importCollection(collection, collectionLocation, mainWindow, last
 
   const collectionContent = await stringifyCollection(collection.root);
   await writeFile(path.join(collectionPath, 'collection.bru'), collectionContent);
+
+  // Save OpenAPI spec if provided (for read-only collections)
+  if (openapiSpec) {
+    let yamlContent;
+
+    if (openapiFormat === 'json') {
+      // Convert JSON to YAML
+      yamlContent = jsyaml.dump(openapiSpec, {
+        noRefs: true,
+        lineWidth: -1 // Don't wrap lines
+      });
+    } else {
+      // Already YAML, but ensure consistent formatting
+      yamlContent = jsyaml.dump(openapiSpec, {
+        noRefs: true,
+        lineWidth: -1
+      });
+    }
+
+    const openapiPath = path.join(collectionPath, 'openapi.yaml');
+    await writeFile(openapiPath, yamlContent);
+  }
 
   const { size, filesCount } = await getCollectionStats(collectionPath);
   brunoConfig.size = size;
