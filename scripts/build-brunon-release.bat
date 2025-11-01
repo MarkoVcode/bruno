@@ -27,17 +27,22 @@ if %errorlevel% equ 0 (
   echo Warning: Not on a tagged commit. Version will use package.json value only.
 )
 
-REM Step 1: Apply BrunoN branding to UI files
+REM Step 1: Build required packages
+echo Building required packages...
+call npm run build:openapi-docs
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+REM Step 2: Apply BrunoN branding to UI files
 echo Applying BrunoN branding...
 node scripts/apply-brunon-branding.js
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-REM Step 2: Build web application
+REM Step 3: Build web application
 echo Building web application...
 call npm run build:web
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-REM Step 3: Prepare Electron web assets
+REM Step 4: Prepare Electron web assets
 echo Preparing Electron web assets...
 
 REM Remove old build directories
@@ -59,7 +64,7 @@ for /r packages\bruno-electron\web %%f in (*.map) do del "%%f"
 
 echo Web assets prepared
 
-REM Step 4: Build Electron distributables
+REM Step 5: Build Electron distributables
 echo Building Electron package for %PLATFORM%...
 
 if "%PLATFORM%"=="snap" (

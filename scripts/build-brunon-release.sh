@@ -27,15 +27,19 @@ else
   echo "Warning: Not on a tagged commit. Version will use package.json value only."
 fi
 
-# Step 1: Apply BrunoN branding to UI files
+# Step 1: Build required packages
+echo "Building required packages..."
+npm run build:openapi-docs
+
+# Step 2: Apply BrunoN branding to UI files
 echo "Applying BrunoN branding..."
 node scripts/apply-brunon-branding.js
 
-# Step 2: Build web application
+# Step 3: Build web application
 echo "Building web application..."
 npm run build:web
 
-# Step 3: Prepare Electron web assets
+# Step 4: Prepare Electron web assets
 echo "Preparing Electron web assets..."
 
 # Remove old build directories
@@ -64,7 +68,7 @@ find packages/bruno-electron/web -name '*.map' -type f -delete
 
 echo "Web assets prepared"
 
-# Step 4: Build Electron distributables
+# Step 5: Build Electron distributables
 echo "Building Electron package for $PLATFORM..."
 
 case "$PLATFORM" in
