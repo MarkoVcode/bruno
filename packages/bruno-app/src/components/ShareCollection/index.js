@@ -141,7 +141,7 @@ const ShareCollection = ({ onClose, collectionUid }) => {
     <>
       <Modal
         size="md"
-        title="Share Collection"
+        title="Export Collection"
         confirmText="Close"
         handleConfirm={onClose}
         handleCancel={onClose}
