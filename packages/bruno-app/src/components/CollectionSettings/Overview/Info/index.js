@@ -109,7 +109,8 @@ const Info = ({ collection }) => {
     if (!remoteSource?.url) return;
 
     // Check if collection is read-only
-    if (!collection.readOnly) {
+    const isReadOnly = collection.brunoConfig?.readOnly || collection.readOnly;
+    if (!isReadOnly) {
       toast.error('Collection must be read-only to sync from remote source');
       return;
     }
@@ -208,14 +209,14 @@ const Info = ({ collection }) => {
                 )}
                 <button
                   onClick={handleSyncFromRemote}
-                  disabled={!collection.readOnly || isSyncing}
+                  disabled={!(collection.brunoConfig?.readOnly || collection.readOnly) || isSyncing}
                   className={`mt-3 px-4 py-2 text-sm rounded-md transition-colors flex items-center gap-2 ${
-                    collection.readOnly && !isSyncing
+                    (collection.brunoConfig?.readOnly || collection.readOnly) && !isSyncing
                       ? 'bg-cyan-600 hover:bg-cyan-700 text-white cursor-pointer'
                       : 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                   }`}
                   title={
-                    !collection.readOnly
+                    !(collection.brunoConfig?.readOnly || collection.readOnly)
                       ? 'Collection must be read-only to sync from remote source'
                       : isSyncing
                         ? 'Syncing...'
