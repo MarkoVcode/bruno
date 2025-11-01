@@ -72,6 +72,7 @@ async function setup() {
 
     // Build packages
     execCommand('npm run build:graphql-docs', 'Building graphql-docs');
+    execCommand('npm run build:openapi-docs', 'Building openapi-docs');
     execCommand('npm run build:bruno-query', 'Building bruno-query');
     execCommand('npm run build:bruno-common', 'Building bruno-common');
     execCommand('npm run build:bruno-converters', 'Building bruno-converters');
