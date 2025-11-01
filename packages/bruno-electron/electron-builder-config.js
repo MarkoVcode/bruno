@@ -28,7 +28,7 @@ const config = {
   files: ['**/*'],
   afterSign: 'notarize.js',
   mac: {
-    artifactName: '${productName}_${version}_${arch}_${os}.${ext}',
+    artifactName: '${productName}_${buildVersion}_${arch}_${os}.${ext}',
     category: 'public.app-category.developer-tools',
     target: [
       {
@@ -47,7 +47,7 @@ const config = {
     entitlementsInherit: 'resources/entitlements.mac.plist'
   },
   linux: {
-    artifactName: '${productName}_${version}_${arch}_linux.${ext}',
+    artifactName: '${productName}_${buildVersion}_${arch}_linux.${ext}',
     icon: 'resources/icons/png',
     target: ['AppImage', 'deb', 'snap', 'rpm']
   },
@@ -67,7 +67,7 @@ const config = {
     ]
   },
   win: {
-    artifactName: '${productName}_${version}_${arch}_win.${ext}',
+    artifactName: '${productName}_${buildVersion}_${arch}_win.${ext}',
     icon: 'resources/icons/win/icon.ico',
     target: [
       {
