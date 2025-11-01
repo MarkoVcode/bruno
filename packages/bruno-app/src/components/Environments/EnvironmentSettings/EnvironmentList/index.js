@@ -16,7 +16,6 @@ const EnvironmentList = ({ selectedEnvironment, setSelectedEnvironment, collecti
   const [openCreateModal, setOpenCreateModal] = useState(false);
   const [openImportModal, setOpenImportModal] = useState(false);
   const [openManageSecretsModal, setOpenManageSecretsModal] = useState(false);
-  const isReadOnly = collection.brunoConfig?.readOnly || collection.readOnly;
 
   const [switchEnvConfirmClose, setSwitchEnvConfirmClose] = useState(false);
   const [originalEnvironmentVariables, setOriginalEnvironmentVariables] = useState([]);
@@ -121,20 +120,16 @@ const EnvironmentList = ({ selectedEnvironment, setSelectedEnvironment, collecti
                   </div>
                 </ToolHint>
               ))}
-            {!isReadOnly && (
-              <div className="btn-create-environment" onClick={() => handleCreateEnvClick()}>
-                + <span>Create</span>
-              </div>
-            )}
+            <div className="btn-create-environment" onClick={() => handleCreateEnvClick()}>
+              + <span>Create</span>
+            </div>
 
             <div className="mt-auto btn-import-environment">
-              {!isReadOnly && (
-                <div className="flex items-center" onClick={() => handleImportClick()}>
-                  <IconDownload size={12} strokeWidth={2} />
-                  <span className="label ml-1 text-xs">Import</span>
-                </div>
-              )}
-              <div className={`flex items-center ${!isReadOnly ? 'mt-2' : ''}`} onClick={() => handleSecretsClick()}>
+              <div className="flex items-center" onClick={() => handleImportClick()}>
+                <IconDownload size={12} strokeWidth={2} />
+                <span className="label ml-1 text-xs">Import</span>
+              </div>
+              <div className="flex items-center mt-2" onClick={() => handleSecretsClick()}>
                 <IconShieldLock size={12} strokeWidth={2} />
                 <span className="label ml-1 text-xs">Managing Secrets</span>
               </div>
