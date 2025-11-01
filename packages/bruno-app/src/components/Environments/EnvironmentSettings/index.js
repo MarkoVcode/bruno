@@ -19,25 +19,33 @@ export const SharedButton = ({ children, className, onClick }) => {
   );
 };
 
-const DefaultTab = ({ setTab }) => {
+const DefaultTab = ({ setTab, isReadOnly }) => {
   return (
     <div className="text-center items-center flex flex-col">
       <IconFileAlert size={64} strokeWidth={1} />
       <span className="font-semibold mt-2">No environments found</span>
-      <span className="font-extralight mt-2 text-zinc-500 dark:text-zinc-400">
-        Get started by using the following buttons :
-      </span>
-      <div className="flex items-center justify-center mt-6">
-        <SharedButton onClick={() => setTab('create')}>
-          <span>Create Environment</span>
-        </SharedButton>
+      {isReadOnly ? (
+        <span className="font-extralight mt-2 text-zinc-500 dark:text-zinc-400">
+          This collection is read-only. Environments cannot be created or modified.
+        </span>
+      ) : (
+        <>
+          <span className="font-extralight mt-2 text-zinc-500 dark:text-zinc-400">
+            Get started by using the following buttons :
+          </span>
+          <div className="flex items-center justify-center mt-6">
+            <SharedButton onClick={() => setTab('create')}>
+              <span>Create Environment</span>
+            </SharedButton>
 
-        <span className="mx-4">Or</span>
+            <span className="mx-4">Or</span>
 
-        <SharedButton onClick={() => setTab('import')}>
-          <span>Import Environment</span>
-        </SharedButton>
-      </div>
+            <SharedButton onClick={() => setTab('import')}>
+              <span>Import Environment</span>
+            </SharedButton>
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -47,16 +55,18 @@ const EnvironmentSettings = ({ collection, onClose }) => {
   const { environments } = collection;
   const [selectedEnvironment, setSelectedEnvironment] = useState(null);
   const [tab, setTab] = useState('default');
+  const isReadOnly = collection.brunoConfig?.readOnly || collection.readOnly;
+
   if (!environments || !environments.length) {
     return (
       <StyledWrapper>
         <Modal size="md" title="Environments" handleCancel={onClose} hideCancel={true} hideFooter={true}>
-          {tab === 'create' ? (
+          {tab === 'create' && !isReadOnly ? (
             <CreateEnvironment collection={collection} onClose={() => setTab('default')} />
-          ) : tab === 'import' ? (
+          ) : tab === 'import' && !isReadOnly ? (
             <ImportEnvironment collection={collection} onClose={() => setTab('default')} />
           ) : (
-            <DefaultTab setTab={setTab} />
+            <DefaultTab setTab={setTab} isReadOnly={isReadOnly} />
           )}
         </Modal>
       </StyledWrapper>
