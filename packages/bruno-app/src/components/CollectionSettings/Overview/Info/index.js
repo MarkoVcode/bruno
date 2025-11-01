@@ -1,6 +1,6 @@
 import React from "react";
 import { getTotalRequestCountInCollection } from 'utils/collections/';
-import { IconFolder, IconWorld, IconApi, IconShare, IconFileCode, IconRefresh } from '@tabler/icons';
+import { IconFolder, IconWorld, IconApi, IconDownload, IconFileCode, IconRefresh } from '@tabler/icons';
 import { areItemsLoading, getItemsLoadStats } from "utils/collections/index";
 import { useState, useEffect } from 'react';
 import ShareCollection from "components/ShareCollection/index";
@@ -232,7 +232,7 @@ const Info = ({ collection }) => {
 
           <div className="flex items-start group cursor-pointer" onClick={handleToggleShowShareCollectionModal(true)}>
             <div className="flex-shrink-0 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
-              <IconShare className="w-5 h-5 text-indigo-500" stroke={1.5} />
+              <IconDownload className="w-5 h-5 text-indigo-500" stroke={1.5} />
             </div>
             <div className="ml-4 h-full flex flex-col justify-start">
               <div className="font-semibold text-sm h-fit my-auto">Export</div>
