@@ -6,8 +6,9 @@ const jsyaml = require('js-yaml');
  * Check if a collection is read-only based on OpenAPI spec
  *
  * A collection is read-only if:
- * 1. It has an openapi.yaml file in the root
- * 2. The OpenAPI spec's info.title matches the collection name exactly
+ * 1. It has an openapi.yaml file in the root AND the OpenAPI spec's info.title matches the collection name exactly
+ * OR
+ * 2. It has openapiSource.url in bruno.json (imported from URL)
  *
  * @param {string} collectionPath - Absolute path to collection directory
  * @param {string} collectionName - Name of the collection
@@ -15,6 +16,24 @@ const jsyaml = require('js-yaml');
  */
 function isReadOnlyCollection(collectionPath, collectionName) {
   try {
+    // Check for URL-based source in bruno.json
+    const brunoJsonPath = path.join(collectionPath, 'bruno.json');
+    if (fs.existsSync(brunoJsonPath)) {
+      try {
+        const brunoJsonContent = fs.readFileSync(brunoJsonPath, 'utf8');
+        const brunoConfig = JSON.parse(brunoJsonContent);
+
+        // If collection has a remote URL source, it's read-only
+        if (brunoConfig.openapiSource && brunoConfig.openapiSource.url) {
+          return true;
+        }
+      } catch (brunoJsonError) {
+        // Continue to check openapi.yaml method
+        console.warn('Error reading bruno.json for read-only check:', brunoJsonError);
+      }
+    }
+
+    // Fallback to checking openapi.yaml method
     const openapiPath = path.join(collectionPath, 'openapi.yaml');
 
     // Check if openapi.yaml exists

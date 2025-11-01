@@ -1792,11 +1792,11 @@ export const collectionAddEnvFileEvent = (payload) => (dispatch, getState) => {
   });
 };
 
-export const importCollection = (collection, collectionLocation, openapiSpec = null, openapiFormat = null) => (dispatch, getState) => {
+export const importCollection = (collection, collectionLocation, openapiSpec = null, openapiFormat = null, openapiUrl = null) => (dispatch, getState) => {
   return new Promise((resolve, reject) => {
     const { ipcRenderer } = window;
 
-    ipcRenderer.invoke('renderer:import-collection', collection, collectionLocation, openapiSpec, openapiFormat).then(resolve).catch(reject);
+    ipcRenderer.invoke('renderer:import-collection', collection, collectionLocation, openapiSpec, openapiFormat, openapiUrl).then(resolve).catch(reject);
   });
 };
 

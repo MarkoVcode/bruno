@@ -29,6 +29,8 @@ const Info = ({ collection }) => {
   const { loading: itemsLoadingCount, total: totalItems } = getItemsLoadStats(collection);
   const [showShareCollectionModal, toggleShowShareCollectionModal] = useState(false);
   const [hasOpenApi, setHasOpenApi] = useState(false);
+  const [remoteSource, setRemoteSource] = useState(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Environment sync state
   const syncRelationships = useSelector((state) => state.app.environmentSync.syncRelationships);
@@ -52,7 +54,14 @@ const Info = ({ collection }) => {
     };
 
     checkOpenApi();
-  }, [collection.pathname]);
+
+    // Check for remote source metadata
+    if (collection.brunoConfig?.openapiSource) {
+      setRemoteSource(collection.brunoConfig.openapiSource);
+    } else {
+      setRemoteSource(null);
+    }
+  }, [collection.pathname, collection.brunoConfig]);
 
   const handleToggleShowShareCollectionModal = (value) => (e) => {
     toggleShowShareCollectionModal(value);
@@ -93,6 +102,31 @@ const Info = ({ collection }) => {
     } catch (error) {
       toast.error('Failed to update environment subscription');
       console.error('Error updating subscription:', error);
+    }
+  };
+
+  const handleSyncFromRemote = async () => {
+    if (!remoteSource?.url) return;
+
+    // Check if collection is read-only
+    if (!collection.readOnly) {
+      toast.error('Collection must be read-only to sync from remote source');
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      const { ipcRenderer } = window;
+      const result = await ipcRenderer.invoke('renderer:sync-openapi-collection', collection.pathname);
+
+      if (result.success) {
+        toast.success('Collection synced successfully from remote source');
+      }
+    } catch (error) {
+      console.error('Error syncing collection:', error);
+      toast.error(error.message || 'Failed to sync collection from remote source');
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -152,6 +186,45 @@ const Info = ({ collection }) => {
                 <div className="mt-1 text-sm group-hover:underline text-link">
                   View API Documentation
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Remote Source Row - Show if collection was imported from URL */}
+          {remoteSource && remoteSource.url && (
+            <div className="flex items-start">
+              <div className="flex-shrink-0 p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
+                <IconWorld className="w-5 h-5 text-cyan-500" stroke={1.5} />
+              </div>
+              <div className="ml-4 flex-1">
+                <div className="font-semibold text-sm">Remote Source</div>
+                <div className="mt-1 text-sm text-muted break-all" title={remoteSource.url}>
+                  {remoteSource.url}
+                </div>
+                {remoteSource.lastSynced && (
+                  <div className="mt-1 text-xs text-muted">
+                    Last synced: {new Date(remoteSource.lastSynced).toLocaleString()}
+                  </div>
+                )}
+                <button
+                  onClick={handleSyncFromRemote}
+                  disabled={!collection.readOnly || isSyncing}
+                  className={`mt-3 px-4 py-2 text-sm rounded-md transition-colors flex items-center gap-2 ${
+                    collection.readOnly && !isSyncing
+                      ? 'bg-cyan-600 hover:bg-cyan-700 text-white cursor-pointer'
+                      : 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                  }`}
+                  title={
+                    !collection.readOnly
+                      ? 'Collection must be read-only to sync from remote source'
+                      : isSyncing
+                        ? 'Syncing...'
+                        : 'Refresh collection from remote source'
+                  }
+                >
+                  <IconRefresh className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} stroke={1.5} />
+                  {isSyncing ? 'Syncing...' : 'Refresh'}
+                </button>
               </div>
             </div>
           )}

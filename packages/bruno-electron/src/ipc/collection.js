@@ -50,6 +50,8 @@ const { moveRequestUid, deleteRequestUid } = require('../cache/requestUids');
 const { deleteCookiesForDomain, getDomainsWithCookies, addCookieForDomain, modifyCookieForDomain, parseCookieString, createCookieString, deleteCookie } = require('../utils/cookies');
 const { importCollection: importCollectionUtil } = require('../utils/collection-import');
 const { isReadOnlyCollection, getOpenapiSpec } = require('../utils/readonly-detection');
+const { fetchOpenapiFromUrl } = require('../utils/openapi-url-fetcher');
+const { syncCollectionFromUrl } = require('../utils/collection-sync');
 const EnvironmentSecretsStore = require('../store/env-secrets');
 const CollectionSecurityStore = require('../store/collection-security');
 const UiStateSnapshotStore = require('../store/ui-state-snapshot');
@@ -109,12 +111,17 @@ const checkReadOnlyCollection = (pathname, lastOpenedCollections) => {
   });
 
   if (collectionPath) {
-    // Read bruno.json to get collection name
+    // Read bruno.json to get collection name and check for remote source
     const brunoJsonPath = path.join(collectionPath, 'bruno.json');
     if (fs.existsSync(brunoJsonPath)) {
       const brunoConfig = JSON.parse(fs.readFileSync(brunoJsonPath, 'utf8'));
       if (isReadOnlyCollection(collectionPath, brunoConfig.name)) {
-        throw new Error('Cannot modify a read-only collection. This collection is synced with openapi.yaml.');
+        // Check if it's a URL-based source or file-based
+        const isUrlBased = brunoConfig.openapiSource && brunoConfig.openapiSource.url;
+        const errorMessage = isUrlBased
+          ? `Cannot modify a read-only collection. This collection is synced from remote source: ${brunoConfig.openapiSource.url}`
+          : 'Cannot modify a read-only collection. This collection is synced with openapi.yaml.';
+        throw new Error(errorMessage);
       }
     }
   }
@@ -665,7 +672,7 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
     lastOpenedCollections.update(collectionPaths);
   })
 
-  ipcMain.handle('renderer:import-collection', async (event, collection, collectionLocation, openapiSpec = null, openapiFormat = null) => {
+  ipcMain.handle('renderer:import-collection', async (event, collection, collectionLocation, openapiSpec = null, openapiFormat = null, openapiUrl = null) => {
     try {
       // Use the shared import utility function
       await importCollectionUtil(collection,
@@ -674,7 +681,17 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
         lastOpenedCollections,
         null, // uniqueFolderName (let utility handle it)
         openapiSpec,
-        openapiFormat);
+        openapiFormat,
+        openapiUrl);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  });
+
+  ipcMain.handle('renderer:fetch-openapi-from-url', async (event, url) => {
+    try {
+      const result = await fetchOpenapiFromUrl(url);
+      return result;
     } catch (error) {
       return Promise.reject(error);
     }
@@ -966,6 +983,16 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
     } catch (error) {
       console.error('Error checking for OpenAPI spec:', error);
       return false;
+    }
+  });
+
+  // Sync collection from remote OpenAPI URL
+  ipcMain.handle('renderer:sync-openapi-collection', async (event, collectionPath) => {
+    try {
+      const result = await syncCollectionFromUrl(collectionPath, mainWindow, lastOpenedCollections);
+      return result;
+    } catch (error) {
+      return Promise.reject(error);
     }
   });
 

@@ -23,9 +23,9 @@ const TitleBar = () => {
   const dispatch = useDispatch();
   const { ipcRenderer } = window;
 
-  const handleImportCollection = ({ collection, openapiSpec, openapiFormat }) => {
+  const handleImportCollection = ({ collection, openapiSpec, openapiFormat, openapiUrl }) => {
     setImportedCollection(collection);
-    setImportedCollectionMeta({ openapiSpec, openapiFormat });
+    setImportedCollectionMeta({ openapiSpec, openapiFormat, openapiUrl });
     setImportCollectionModalOpen(false);
     setImportCollectionLocationModalOpen(true);
   };
@@ -34,7 +34,8 @@ const TitleBar = () => {
     dispatch(importCollection(importedCollection,
       collectionLocation,
       importedCollectionMeta?.openapiSpec,
-      importedCollectionMeta?.openapiFormat))
+      importedCollectionMeta?.openapiFormat,
+      importedCollectionMeta?.openapiUrl))
       .then(() => {
         setImportCollectionLocationModalOpen(false);
         setImportedCollection(null);

@@ -30,8 +30,9 @@ async function findUniqueFolderName(baseName, collectionLocation, counter = 0) {
  * @param {string|null} uniqueFolderName - Optional folder name override
  * @param {Object|null} openapiSpec - Optional OpenAPI spec object (for read-only collections)
  * @param {string|null} openapiFormat - Format of original spec: 'json' or 'yaml'
+ * @param {string|null} openapiUrl - Optional URL where OpenAPI spec was fetched from
  */
-async function importCollection(collection, collectionLocation, mainWindow, lastOpenedCollections, uniqueFolderName = null, openapiSpec = null, openapiFormat = null) {
+async function importCollection(collection, collectionLocation, mainWindow, lastOpenedCollections, uniqueFolderName = null, openapiSpec = null, openapiFormat = null, openapiUrl = null) {
   // Use provided unique folder name or use collection name
   let folderName = uniqueFolderName ? sanitizeName(uniqueFolderName) : sanitizeName(collection.name);
   let collectionPath = path.join(collectionLocation, folderName);
@@ -88,7 +89,7 @@ async function importCollection(collection, collectionLocation, mainWindow, last
     }
   };
 
-  const getBrunoJsonConfig = (collection, hasOpenapiSpec = false) => {
+  const getBrunoJsonConfig = (collection, hasOpenapiSpec = false, sourceUrl = null) => {
     let brunoConfig = collection.brunoConfig;
 
     if (!brunoConfig) {
@@ -116,13 +117,22 @@ async function importCollection(collection, collectionLocation, mainWindow, last
       }
     }
 
+    // Add openapiSource metadata if URL is provided
+    if (sourceUrl) {
+      brunoConfig.openapiSource = {
+        type: 'url',
+        url: sourceUrl,
+        lastSynced: new Date().toISOString()
+      };
+    }
+
     return brunoConfig;
   };
 
   await createDirectory(collectionPath);
 
   const uid = generateUidBasedOnHash(collectionPath);
-  let brunoConfig = getBrunoJsonConfig(collection, !!openapiSpec);
+  let brunoConfig = getBrunoJsonConfig(collection, !!openapiSpec, openapiUrl);
   const stringifiedBrunoConfig = await stringifyJson(brunoConfig);
 
   // Write the Bruno configuration to a file
