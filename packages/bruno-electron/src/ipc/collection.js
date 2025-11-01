@@ -989,7 +989,7 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
   // Sync collection from remote OpenAPI URL
   ipcMain.handle('renderer:sync-openapi-collection', async (event, collectionPath) => {
     try {
-      const result = await syncCollectionFromUrl(collectionPath, mainWindow, lastOpenedCollections);
+      const result = await syncCollectionFromUrl(collectionPath, mainWindow, lastOpenedCollections, watcher);
       return result;
     } catch (error) {
       return Promise.reject(error);

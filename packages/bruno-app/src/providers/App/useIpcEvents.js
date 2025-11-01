@@ -96,6 +96,12 @@ const useIpcEvents = () => {
       dispatch(openCollectionEvent(uid, pathname, brunoConfig));
     });
 
+    const removeCollectionReloadedListener = ipcRenderer.on('main:collection-reloaded', (pathname, uid, brunoConfig) => {
+      // Update the collection's bruno config (metadata like lastSynced timestamp)
+      // The watcher will then populate it with the new items from disk
+      dispatch(brunoConfigUpdateEvent({ collectionUid: uid, brunoConfig }));
+    });
+
     const removeCollectionAlreadyOpenedListener = ipcRenderer.on('main:collection-already-opened', (pathname) => {
       toast.success('Collection is already opened');
     });
@@ -195,6 +201,7 @@ const useIpcEvents = () => {
     return () => {
       removeCollectionTreeUpdateListener();
       removeOpenCollectionListener();
+      removeCollectionReloadedListener();
       removeCollectionAlreadyOpenedListener();
       removeDisplayErrorListener();
       removeScriptEnvUpdateListener();

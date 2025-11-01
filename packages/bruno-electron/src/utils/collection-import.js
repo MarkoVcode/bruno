@@ -31,9 +31,8 @@ async function findUniqueFolderName(baseName, collectionLocation, counter = 0) {
  * @param {Object|null} openapiSpec - Optional OpenAPI spec object (for read-only collections)
  * @param {string|null} openapiFormat - Format of original spec: 'json' or 'yaml'
  * @param {string|null} openapiUrl - Optional URL where OpenAPI spec was fetched from
- * @param {Object} options - Optional configuration: { skipOpen: boolean } - if true, skip sending collection-opened event
  */
-async function importCollection(collection, collectionLocation, mainWindow, lastOpenedCollections, uniqueFolderName = null, openapiSpec = null, openapiFormat = null, openapiUrl = null, options = {}) {
+async function importCollection(collection, collectionLocation, mainWindow, lastOpenedCollections, uniqueFolderName = null, openapiSpec = null, openapiFormat = null, openapiUrl = null) {
   // Use provided unique folder name or use collection name
   let folderName = uniqueFolderName ? sanitizeName(uniqueFolderName) : sanitizeName(collection.name);
   let collectionPath = path.join(collectionLocation, folderName);
@@ -172,11 +171,8 @@ async function importCollection(collection, collectionLocation, mainWindow, last
   const readOnly = isReadOnlyCollection(collectionPath, brunoConfig.name);
   brunoConfig.readOnly = readOnly;
 
-  // Only send collection-opened event if not skipping (e.g., during sync)
-  if (!options.skipOpen) {
-    mainWindow.webContents.send('main:collection-opened', collectionPath, uid, brunoConfig);
-    ipcMain.emit('main:collection-opened', mainWindow, collectionPath, uid, brunoConfig);
-  }
+  mainWindow.webContents.send('main:collection-opened', collectionPath, uid, brunoConfig);
+  ipcMain.emit('main:collection-opened', mainWindow, collectionPath, uid, brunoConfig);
 
   lastOpenedCollections.add(collectionPath);
 

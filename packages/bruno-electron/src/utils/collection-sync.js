@@ -11,9 +11,10 @@ const fsExtra = require('fs-extra');
  * @param {string} collectionPath - Path to the collection directory
  * @param {Object} mainWindow - Electron main window
  * @param {Object} lastOpenedCollections - Collection history manager
+ * @param {Object} watcher - Collection watcher instance
  * @returns {Promise<{success: boolean, message: string}>}
  */
-async function syncCollectionFromUrl(collectionPath, mainWindow, lastOpenedCollections) {
+async function syncCollectionFromUrl(collectionPath, mainWindow, lastOpenedCollections, watcher) {
   // Read bruno.json to get the OpenAPI source URL
   const brunoJsonPath = path.join(collectionPath, 'bruno.json');
 
@@ -63,20 +64,27 @@ async function syncCollectionFromUrl(collectionPath, mainWindow, lastOpenedColle
   // Use the same grouping type as before (default to 'tags')
   const collection = openApiToBruno(spec, { groupBy: 'tags' });
 
-  // Store the UID before deletion (we'll need it for reopening)
+  // Store the UID before deletion
   const { generateUidBasedOnHash } = require('./common');
   const originalUid = generateUidBasedOnHash(collectionPath);
+
+  // Remove the watcher before deleting the collection directory
+  // This prevents the watcher from detecting file changes during the sync process
+  if (watcher && watcher.hasWatcher(collectionPath)) {
+    watcher.removeWatcher(collectionPath, mainWindow, originalUid);
+  }
 
   // Delete the entire collection directory
   await fsExtra.remove(collectionPath);
 
-  // Delay to ensure file watcher processes the deletion before we recreate
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
   // Import the collection with the same folder name
-  // Skip sending collection-opened event since the collection is already open
-  // The file watcher will detect the new files and add them to the existing collection
-  const { uid } = await importCollection(collection, collectionLocation, mainWindow, lastOpenedCollections, collectionFolderName, spec, format, sourceUrl, { skipOpen: true });
+  // This will recreate all files in the collection directory
+  const { uid, brunoConfig: updatedBrunoConfig } = await importCollection(collection, collectionLocation, mainWindow, lastOpenedCollections, collectionFolderName, spec, format, sourceUrl);
+
+  // The importCollection function sends main:collection-opened event
+  // However, since the collection is already open in the UI, we need to reload it
+  // Send a collection reload event to refresh the UI with the new data
+  mainWindow.webContents.send('main:collection-reloaded', collectionPath, uid, updatedBrunoConfig);
 
   return {
     success: true,
