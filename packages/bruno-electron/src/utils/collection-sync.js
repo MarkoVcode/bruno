@@ -70,12 +70,13 @@ async function syncCollectionFromUrl(collectionPath, mainWindow, lastOpenedColle
   // Delete the entire collection directory
   await fsExtra.remove(collectionPath);
 
-  // Small delay to ensure file watcher processes the deletion
-  await new Promise((resolve) => setTimeout(resolve, 100));
+  // Delay to ensure file watcher processes the deletion before we recreate
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
   // Import the collection with the same folder name
-  // This will create the collection and send main:collection-opened event
-  const { uid } = await importCollection(collection, collectionLocation, mainWindow, lastOpenedCollections, collectionFolderName, spec, format, sourceUrl);
+  // Skip sending collection-opened event since the collection is already open
+  // The file watcher will detect the new files and add them to the existing collection
+  const { uid } = await importCollection(collection, collectionLocation, mainWindow, lastOpenedCollections, collectionFolderName, spec, format, sourceUrl, { skipOpen: true });
 
   return {
     success: true,
