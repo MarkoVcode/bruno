@@ -1,11 +1,25 @@
 import React from "react";
 import { getTotalRequestCountInCollection } from 'utils/collections/';
-import { IconFolder, IconWorld, IconApi, IconShare, IconFileCode } from '@tabler/icons';
+import { IconFolder, IconWorld, IconApi, IconShare, IconFileCode, IconRefresh } from '@tabler/icons';
 import { areItemsLoading, getItemsLoadStats } from "utils/collections/index";
 import { useState, useEffect } from 'react';
 import ShareCollection from "components/ShareCollection/index";
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { updateSettingsSelectedTab } from 'providers/ReduxStore/slices/collections';
+import {
+  toggleCollectionAsMaster,
+  subscribeCollectionToMaster,
+  unsubscribeCollectionFromMaster
+} from 'providers/ReduxStore/slices/collections/actions';
+import {
+  isCollectionMaster,
+  isCollectionSubscriber,
+  getMasterCollectionUid,
+  getSubscriberCollectionUids,
+  getAvailableMasterCollections
+} from 'utils/environment-sync';
+import { findCollectionByUid } from 'utils/collections';
+import toast from 'react-hot-toast';
 
 const Info = ({ collection }) => {
   const dispatch = useDispatch();
@@ -15,6 +29,15 @@ const Info = ({ collection }) => {
   const { loading: itemsLoadingCount, total: totalItems } = getItemsLoadStats(collection);
   const [showShareCollectionModal, toggleShowShareCollectionModal] = useState(false);
   const [hasOpenApi, setHasOpenApi] = useState(false);
+
+  // Environment sync state
+  const syncRelationships = useSelector((state) => state.app.environmentSync.syncRelationships);
+  const collections = useSelector((state) => state.collections.collections);
+  const isMaster = isCollectionMaster(syncRelationships, collection.uid);
+  const isSubscriber = isCollectionSubscriber(syncRelationships, collection.uid);
+  const masterCollectionUid = getMasterCollectionUid(syncRelationships, collection.uid);
+  const subscriberUids = getSubscriberCollectionUids(syncRelationships, collection.uid);
+  const availableMasters = getAvailableMasterCollections(syncRelationships, collection.uid);
 
   useEffect(() => {
     const checkOpenApi = async () => {
@@ -40,6 +63,37 @@ const Info = ({ collection }) => {
       collectionUid: collection.uid,
       tab: 'apidoc'
     }));
+  };
+
+  const handleToggleMaster = async (e) => {
+    const checked = e.target.checked;
+    try {
+      await dispatch(toggleCollectionAsMaster(collection.uid, checked));
+      toast.success(checked ? 'Environment sharing enabled' : 'Environment sharing disabled');
+    } catch (error) {
+      toast.error('Failed to update environment sharing');
+      console.error('Error toggling master:', error);
+    }
+  };
+
+  const handleSubscriberChange = async (e) => {
+    const selectedMasterUid = e.target.value;
+
+    try {
+      if (selectedMasterUid === '') {
+        // Unsubscribe
+        await dispatch(unsubscribeCollectionFromMaster(collection.uid));
+        toast.success('Unsubscribed from master environment');
+      } else {
+        // Subscribe to new master
+        await dispatch(subscribeCollectionToMaster(collection.uid, selectedMasterUid));
+        const masterCollection = findCollectionByUid(collections, selectedMasterUid);
+        toast.success(`Subscribed to ${masterCollection?.name || 'master'} environments`);
+      }
+    } catch (error) {
+      toast.error('Failed to update environment subscription');
+      console.error('Error updating subscription:', error);
+    }
   };
 
   return (
@@ -113,6 +167,76 @@ const Info = ({ collection }) => {
               </div>
             </div>
           </div>
+
+          {/* Environment Sharing Section */}
+          <div className="flex items-start">
+            <div className="flex-shrink-0 p-3 bg-teal-50 dark:bg-teal-900/20 rounded-lg">
+              <IconRefresh className="w-5 h-5 text-teal-500" stroke={1.5} />
+            </div>
+            <div className="ml-4 flex-1">
+              <div className="font-semibold text-sm mb-3">Environment Sharing</div>
+
+              {/* Master checkbox */}
+              <div className="mb-3">
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={isMaster}
+                    onChange={handleToggleMaster}
+                    disabled={isSubscriber}
+                    className="mr-2 cursor-pointer disabled:cursor-not-allowed"
+                  />
+                  <span className={`text-sm ${isSubscriber ? 'text-muted' : ''}`}>
+                    Share environments with other collections
+                  </span>
+                </label>
+                {isMaster && subscriberUids.length > 0 && (
+                  <div className="mt-1 ml-6 text-xs text-muted">
+                    {subscriberUids.length} collection{subscriberUids.length !== 1 ? 's' : ''} subscribed
+                  </div>
+                )}
+              </div>
+
+              {/* Subscriber dropdown */}
+              <div>
+                <label className="block text-sm text-muted mb-1">
+                  Use shared environment from:
+                </label>
+                <select
+                  value={masterCollectionUid || ''}
+                  onChange={handleSubscriberChange}
+                  disabled={isMaster || availableMasters.length === 0}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <option value="">None (use own environments)</option>
+                  {availableMasters.map((masterUid) => {
+                    const masterCollection = findCollectionByUid(collections, masterUid);
+                    return masterCollection ? (
+                      <option key={masterUid} value={masterUid}>
+                        {masterCollection.name}
+                      </option>
+                    ) : null;
+                  })}
+                </select>
+                {isMaster && (
+                  <div className="mt-1 text-xs text-muted">
+                    Cannot subscribe while sharing environments
+                  </div>
+                )}
+                {!isMaster && availableMasters.length === 0 && (
+                  <div className="mt-1 text-xs text-muted">
+                    No collections available for sharing
+                  </div>
+                )}
+                {isSubscriber && masterCollectionUid && (
+                  <div className="mt-1 text-xs text-muted">
+                    Synced from {findCollectionByUid(collections, masterCollectionUid)?.name || 'master collection'}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
           {showShareCollectionModal && <ShareCollection collectionUid={collection.uid} onClose={handleToggleShowShareCollectionModal(false)} />}
         </div>
       </div>

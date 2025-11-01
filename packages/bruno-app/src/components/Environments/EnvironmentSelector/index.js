@@ -16,6 +16,7 @@ import CreateGlobalEnvironment from 'components/GlobalEnvironments/EnvironmentSe
 import ImportGlobalEnvironment from 'components/GlobalEnvironments/EnvironmentSettings/ImportEnvironment';
 import ToolHint from 'components/ToolHint';
 import StyledWrapper from './StyledWrapper';
+import { isCollectionSubscriber } from 'utils/environment-sync';
 
 const EnvironmentSelector = ({ collection }) => {
   const dispatch = useDispatch();
@@ -30,6 +31,10 @@ const EnvironmentSelector = ({ collection }) => {
 
   const globalEnvironments = useSelector((state) => state.globalEnvironments.globalEnvironments);
   const activeGlobalEnvironmentUid = useSelector((state) => state.globalEnvironments.activeGlobalEnvironmentUid);
+  const syncRelationships = useSelector((state) => state.app.environmentSync.syncRelationships);
+
+  // Check if collection is using shared environments
+  const isSubscriber = collection ? isCollectionSubscriber(syncRelationships, collection.uid) : false;
   const activeGlobalEnvironment = activeGlobalEnvironmentUid
     ? find(globalEnvironments, (e) => e.uid === activeGlobalEnvironmentUid)
     : null;
@@ -215,6 +220,8 @@ const EnvironmentSelector = ({ collection }) => {
               onSettingsClick={handleSettingsClick}
               onCreateClick={handleCreateClick}
               onImportClick={handleImportClick}
+              isCollectionTab={activeTab === 'collection'}
+              isSubscriber={isSubscriber}
             />
           </div>
         </Dropdown>

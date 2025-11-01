@@ -65,6 +65,8 @@ import { buildPersistedEnvVariables } from 'utils/environments';
 import { safeParseJSON, safeStringifyJSON } from 'utils/common/index';
 import { addTab } from 'providers/ReduxStore/slices/tabs';
 import { updateSettingsSelectedTab } from './index';
+import { getSubscriberCollectionUids, copyEnvironmentsFromMaster } from 'utils/environment-sync';
+import { saveEnvironmentSyncConfig } from '../app';
 
 export const renameCollection = (newName, collectionUid) => (dispatch, getState) => {
   const state = getState();
@@ -1321,6 +1323,9 @@ export const addEnvironment = (name, collectionUid) => (dispatch, getState) => {
     }
 
     const { ipcRenderer } = window;
+    const syncRelationships = state.app.environmentSync.syncRelationships;
+    const config = syncRelationships[collectionUid];
+
     ipcRenderer
       .invoke('renderer:create-environment', collection.pathname, name)
       .then(
@@ -1334,6 +1339,13 @@ export const addEnvironment = (name, collectionUid) => (dispatch, getState) => {
           })
         )
       )
+      .then(() => {
+        // If this collection is a master, sync to subscribers
+        const isMaster = config && config.isMaster;
+        if (isMaster) {
+          return dispatch(syncEnvironmentsToSubscribers(collectionUid));
+        }
+      })
       .then(resolve)
       .catch(reject);
   });
@@ -1429,9 +1441,19 @@ export const renameEnvironment = (newName, environmentUid, collectionUid) => (di
     environment.name = sanitizedName;
 
     const { ipcRenderer } = window;
+    const syncRelationships = state.app.environmentSync.syncRelationships;
+    const config = syncRelationships[collectionUid];
+
     environmentSchema
       .validate(environment)
       .then(() => ipcRenderer.invoke('renderer:rename-environment', collection.pathname, oldName, sanitizedName))
+      .then(() => {
+        // If this collection is a master, sync to subscribers
+        const isMaster = config && config.isMaster;
+        if (isMaster) {
+          return dispatch(syncEnvironmentsToSubscribers(collectionUid));
+        }
+      })
       .then(resolve)
       .catch(reject);
   });
@@ -1453,8 +1475,18 @@ export const deleteEnvironment = (environmentUid, collectionUid) => (dispatch, g
     }
 
     const { ipcRenderer } = window;
+    const syncRelationships = state.app.environmentSync.syncRelationships;
+    const config = syncRelationships[collectionUid];
+
     ipcRenderer
       .invoke('renderer:delete-environment', collection.pathname, environment.name)
+      .then(() => {
+        // If this collection is a master, sync to subscribers
+        const isMaster = config && config.isMaster;
+        if (isMaster) {
+          return dispatch(syncEnvironmentsToSubscribers(collectionUid));
+        }
+      })
       .then(resolve)
       .catch(reject);
   });
@@ -1487,13 +1519,28 @@ export const saveEnvironment = (variables, environmentUid, collectionUid) => (di
     const { ipcRenderer } = window;
     const envForValidation = cloneDeep(environment);
 
+    // Determine which collection is the actual master
+    const syncRelationships = state.app.environmentSync.syncRelationships;
+    const config = syncRelationships[collectionUid];
+    const masterCollectionUid = config && config.masterCollectionUid ? config.masterCollectionUid : collectionUid;
+
     environmentSchema
       .validate(environment)
       .then(() => ipcRenderer.invoke('renderer:save-environment', collection.pathname, envForValidation))
       .then(() => {
         // Immediately sync Redux to the saved (persisted) set so old ephemerals
-        // aren’t around when the watcher event arrives.
+        // aren't around when the watcher event arrives.
         dispatch(_saveEnvironment({ variables: persisted, environmentUid, collectionUid }));
+      })
+      .then(() => {
+        // If this collection is a master or has subscribers, sync to all subscribers
+        const isMaster = config && config.isMaster;
+        if (isMaster) {
+          return dispatch(syncEnvironmentsToSubscribers(collectionUid));
+        } else if (config && config.masterCollectionUid) {
+          // If editing via subscriber, sync from the actual master
+          return dispatch(syncEnvironmentsToSubscribers(masterCollectionUid));
+        }
       })
       .then(resolve)
       .catch(reject);
@@ -1980,3 +2027,181 @@ export const openCollectionSettings =
       resolve();
     });
   };
+
+/**
+ * Synchronize environments from master collection to all subscriber collections
+ * This is called whenever environments change in a master collection
+ */
+export const syncEnvironmentsToSubscribers = (masterCollectionUid) => (dispatch, getState) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const state = getState();
+      const syncRelationships = state.app.environmentSync.syncRelationships;
+      const collections = state.collections.collections;
+
+      // Find master collection
+      const masterCollection = findCollectionByUid(collections, masterCollectionUid);
+      if (!masterCollection) {
+        return reject(new Error('Master collection not found'));
+      }
+
+      // Get all subscriber collection UIDs
+      const subscriberUids = getSubscriberCollectionUids(syncRelationships, masterCollectionUid);
+
+      if (subscriberUids.length === 0) {
+        // No subscribers, nothing to sync
+        return resolve();
+      }
+
+      // Get master's environments
+      const masterEnvironments = masterCollection.environments || [];
+
+      // For each subscriber, copy all environments
+      const { ipcRenderer } = window;
+      const syncPromises = [];
+
+      for (const subscriberUid of subscriberUids) {
+        const subscriberCollection = findCollectionByUid(collections, subscriberUid);
+
+        if (!subscriberCollection) {
+          console.warn(`Subscriber collection ${subscriberUid} not found, skipping sync`);
+          continue;
+        }
+
+        // For each environment in master, save to subscriber
+        for (const masterEnv of masterEnvironments) {
+          // Clone the environment to avoid reference issues
+          const envToSync = cloneDeep(masterEnv);
+
+          // Prepare environment for saving (strip ephemeral values)
+          const persisted = buildPersistedEnvVariables(envToSync.variables || [], { mode: 'save' });
+          envToSync.variables = persisted;
+
+          // Check if environment exists in subscriber
+          const subscriberEnv = subscriberCollection.environments?.find((e) => e.name === envToSync.name);
+
+          // Validate and save/create environment in subscriber collection
+          const syncPromise = environmentSchema
+            .validate(envToSync)
+            .then(() => {
+              if (subscriberEnv) {
+                // Environment exists, update it
+                return ipcRenderer.invoke('renderer:save-environment', subscriberCollection.pathname, envToSync);
+              } else {
+                // Environment doesn't exist, create it
+                return ipcRenderer.invoke('renderer:create-environment', subscriberCollection.pathname, envToSync.name, persisted);
+              }
+            })
+            .catch((err) => {
+              console.error(`Failed to sync environment ${envToSync.name} to collection ${subscriberCollection.name}:`,
+                err);
+            });
+
+          syncPromises.push(syncPromise);
+        }
+
+        // Also handle environment deletions: remove environments in subscriber that don't exist in master
+        const subscriberEnvs = subscriberCollection.environments || [];
+        const masterEnvNames = new Set(masterEnvironments.map((env) => env.name));
+
+        for (const subscriberEnv of subscriberEnvs) {
+          if (!masterEnvNames.has(subscriberEnv.name)) {
+            // This environment exists in subscriber but not in master, delete it
+            const deletePromise = ipcRenderer
+              .invoke('renderer:delete-environment', subscriberCollection.pathname, subscriberEnv.name)
+              .catch((err) => {
+                console.error(`Failed to delete environment ${subscriberEnv.name} from collection ${subscriberCollection.name}:`,
+                  err);
+              });
+
+            syncPromises.push(deletePromise);
+          }
+        }
+      }
+
+      // Wait for all sync operations to complete
+      await Promise.all(syncPromises);
+
+      resolve();
+    } catch (error) {
+      console.error('Error syncing environments to subscribers:', error);
+      reject(error);
+    }
+  });
+};
+
+/**
+ * Toggle collection as master for environment sharing
+ */
+export const toggleCollectionAsMaster = (collectionUid, isMaster) => (dispatch, getState) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { setCollectionAsMaster } = await import('../app');
+
+      dispatch(setCollectionAsMaster({ collectionUid, isMaster }));
+      await dispatch(saveEnvironmentSyncConfig());
+
+      resolve();
+    } catch (error) {
+      console.error('Error toggling collection as master:', error);
+      reject(error);
+    }
+  });
+};
+
+/**
+ * Subscribe a collection to master's environments
+ */
+export const subscribeCollectionToMaster = (subscriberCollectionUid, masterCollectionUid) => (dispatch, getState) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const state = getState();
+      const collections = state.collections.collections;
+      const { subscribeToMasterEnvironments } = await import('../app');
+
+      // Validate collections exist
+      const masterCollection = findCollectionByUid(collections, masterCollectionUid);
+      const subscriberCollection = findCollectionByUid(collections, subscriberCollectionUid);
+
+      if (!masterCollection || !subscriberCollection) {
+        return reject(new Error('Collection not found'));
+      }
+
+      // Update sync relationships
+      dispatch(subscribeToMasterEnvironments({ subscriberCollectionUid, masterCollectionUid }));
+
+      // Save sync config
+      await dispatch(saveEnvironmentSyncConfig());
+
+      // Immediately sync environments from master to subscriber
+      await dispatch(syncEnvironmentsToSubscribers(masterCollectionUid));
+
+      resolve();
+    } catch (error) {
+      console.error('Error subscribing collection to master:', error);
+      reject(error);
+    }
+  });
+};
+
+/**
+ * Unsubscribe a collection from master's environments
+ */
+export const unsubscribeCollectionFromMaster = (subscriberCollectionUid) => (dispatch, getState) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { unsubscribeFromMaster } = await import('../app');
+
+      dispatch(unsubscribeFromMaster({ subscriberCollectionUid }));
+      await dispatch(saveEnvironmentSyncConfig());
+
+      // Note: We do NOT delete environments from subscriber
+      // They keep whatever was synced, as per requirements
+
+      resolve();
+    } catch (error) {
+      console.error('Error unsubscribing collection from master:', error);
+      reject(error);
+    }
+  });
+};

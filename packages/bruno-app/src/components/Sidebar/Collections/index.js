@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   IconSearch,
@@ -13,6 +13,7 @@ import CreateCollection from '../CreateCollection';
 import StyledWrapper from './StyledWrapper';
 import CreateOrOpenCollection from './CreateOrOpenCollection';
 import { sortCollections } from 'providers/ReduxStore/slices/collections/actions';
+import { groupCollectionsBySyncRelationship } from 'utils/environment-sync';
 
 // todo: move this to a separate folder
 // the coding convention is to keep all the components in a folder named after the component
@@ -63,7 +64,13 @@ const CollectionsBadge = () => {
 const Collections = () => {
   const [searchText, setSearchText] = useState('');
   const { collections } = useSelector((state) => state.collections);
+  const syncRelationships = useSelector((state) => state.app.environmentSync.syncRelationships);
   const [createCollectionModalOpen, setCreateCollectionModalOpen] = useState(false);
+
+  // Group collections by sync relationships
+  const groupedCollections = useMemo(() => {
+    return groupCollectionsBySyncRelationship(collections, syncRelationships);
+  }, [collections, syncRelationships]);
 
   if (!collections || !collections.length) {
     return (
@@ -114,10 +121,17 @@ const Collections = () => {
       </div>
 
       <div className="mt-4 flex flex-col overflow-hidden hover:overflow-y-auto absolute top-32 bottom-0 left-0 right-0">
-        {collections && collections.length
-          ? collections.map((c) => {
+        {groupedCollections && groupedCollections.length
+          ? groupedCollections.map((c) => {
               return (
-                <Collection searchText={searchText} collection={c} key={c.uid} />
+                <Collection
+                  searchText={searchText}
+                  collection={c}
+                  key={c.uid}
+                  isIndented={c._indented}
+                  isMaster={c._isMaster}
+                  isSubscriber={c._isSubscriber}
+                />
               );
             })
           : null}

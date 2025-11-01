@@ -4,7 +4,7 @@ import classnames from 'classnames';
 import { uuid } from 'utils/common';
 import filter from 'lodash/filter';
 import { useDrop, useDrag } from 'react-dnd';
-import { IconChevronRight, IconDots, IconLoader2, IconLock } from '@tabler/icons';
+import { IconChevronRight, IconDots, IconLoader2, IconLock, IconRefresh, IconShare } from '@tabler/icons';
 import Dropdown from 'components/Dropdown';
 import { toggleCollection, collapseFullCollection } from 'providers/ReduxStore/slices/collections';
 import { mountCollection, moveCollectionAndPersist, handleCollectionItemDrop, pasteItem } from 'providers/ReduxStore/slices/collections/actions';
@@ -29,7 +29,7 @@ import ShareCollection from 'components/ShareCollection/index';
 import { CollectionItemDragPreview } from './CollectionItem/CollectionItemDragPreview/index';
 import { sortByNameThenSequence } from 'utils/common/index';
 
-const Collection = ({ collection, searchText }) => {
+const Collection = ({ collection, searchText, isIndented = false, isMaster = false, isSubscriber = false }) => {
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [showNewRequestModal, setShowNewRequestModal] = useState(false);
   const [showRenameCollectionModal, setShowRenameCollectionModal] = useState(false);
@@ -215,7 +215,11 @@ const Collection = ({ collection, searchText }) => {
   const collectionRowClassName = classnames('flex py-1 collection-name items-center', {
       'item-hovered': isOver && dropType === 'adjacent', // For collection-to-collection moves (show line)
       'drop-target': isOver && dropType === 'inside', // For collection-item drops (highlight full area)
-      'collection-focused-in-tab': isCollectionFocused
+    'collection-focused-in-tab': isCollectionFocused,
+    'pl-3': isIndented, // Add left padding for indented (subscriber) collections
+    'border-l-2 border-teal-400 dark:border-teal-600': isIndented, // Visual connector for subscribers
+    'bg-teal-100 dark:bg-teal-900/40': isMaster || isSubscriber, // Distinctive background for shared environment collections
+    'mt-1': isMaster // Add top margin to master collections for visual separation
     });
 
   // we need to sort request items by seq property
@@ -272,8 +276,26 @@ const Collection = ({ collection, searchText }) => {
               title="Read-only: Synced with openapi.yaml"
             />
           )}
-          <div className="ml-1 w-full" id="sidebar-collection-name" title={collection.name}>
-            {collection.name}
+          <div className="ml-1 flex items-center w-full" id="sidebar-collection-name" title={collection.name}>
+            <span className="truncate">{collection.name}</span>
+            {isMaster && (
+              <IconShare
+                size={12}
+                strokeWidth={2}
+                className="ml-1"
+                style={{ color: 'rgb(45 212 191)', flexShrink: 0 }}
+                title="Sharing environments"
+              />
+            )}
+            {isSubscriber && (
+              <IconRefresh
+                size={12}
+                strokeWidth={2}
+                className="ml-1"
+                style={{ color: 'rgb(45 212 191)', flexShrink: 0 }}
+                title="Using shared environments"
+              />
+            )}
           </div>
           {isLoading ? <IconLoader2 className="animate-spin mx-1" size={18} strokeWidth={1.5} /> : null}
         </div>

@@ -1270,10 +1270,33 @@ const registerRendererEventHandlers = (mainWindow, watcher, lastOpenedCollection
     try {
       // Convert Postman collection to Bruno format
       const brunoCollection = await postmanToBruno(postmanCollection, { useWorkers: true});
-      
+
       return brunoCollection;
     } catch (error) {
       console.error('Error converting Postman to Bruno:', error);
+      return Promise.reject(error);
+    }
+  });
+
+  // Environment Sync IPC handlers
+  const { getSyncConfig, saveSyncConfig } = require('../store/environment-sync');
+
+  ipcMain.handle('renderer:get-environment-sync-config', async (event) => {
+    try {
+      const syncConfig = getSyncConfig();
+      return { syncRelationships: syncConfig };
+    } catch (error) {
+      console.error('Error getting environment sync config:', error);
+      return { syncRelationships: {} };
+    }
+  });
+
+  ipcMain.handle('renderer:save-environment-sync-config', async (event, syncConfig) => {
+    try {
+      await saveSyncConfig(syncConfig.syncRelationships || {});
+      return true;
+    } catch (error) {
+      console.error('Error saving environment sync config:', error);
       return Promise.reject(error);
     }
   });

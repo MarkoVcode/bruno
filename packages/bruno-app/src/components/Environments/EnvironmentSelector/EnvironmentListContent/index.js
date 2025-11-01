@@ -9,8 +9,13 @@ const EnvironmentListContent = ({
   onEnvironmentSelect,
   onSettingsClick,
   onCreateClick,
-  onImportClick
+  onImportClick,
+  isCollectionTab = false,
+  isSubscriber = false
 }) => {
+  // Hide Configure button for collection environments when using shared environments
+  const showConfigureButton = !isCollectionTab || !isSubscriber;
+
   return (
     <div>
       {environments && environments.length > 0 ? (
@@ -43,12 +48,14 @@ const EnvironmentListContent = ({
                 ))}
               </div>
             </ToolHint>
-            <div className="dropdown-item configure-button">
-              <button onClick={onSettingsClick} id="configure-env">
-                <IconSettings size={16} strokeWidth={1.5} />
-                <span>Configure</span>
-              </button>
-            </div>
+            {showConfigureButton && (
+              <div className="dropdown-item configure-button">
+                <button onClick={onSettingsClick} id="configure-env">
+                  <IconSettings size={16} strokeWidth={1.5} />
+                  <span>Configure</span>
+                </button>
+              </div>
+            )}
           </div>
         </>
       ) : (

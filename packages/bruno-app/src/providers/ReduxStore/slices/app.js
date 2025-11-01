@@ -40,6 +40,11 @@ const initialState = {
   systemProxyEnvVariables: {},
   clipboard: {
     hasCopiedItems: false // Whether clipboard has Bruno data (for UI)
+  },
+  environmentSync: {
+    // Maps collection UID to sync configuration
+    // { [collectionUid]: { isMaster: boolean, masterCollectionUid: string | null, subscriberCollectionUids: string[] } }
+    syncRelationships: {}
   }
 };
 
@@ -101,6 +106,111 @@ export const appSlice = createSlice({
     setClipboard: (state, action) => {
       // Update clipboard UI state
       state.clipboard.hasCopiedItems = action.payload.hasCopiedItems;
+    },
+    setCollectionAsMaster: (state, action) => {
+      const { collectionUid, isMaster } = action.payload;
+      if (!state.environmentSync.syncRelationships[collectionUid]) {
+        state.environmentSync.syncRelationships[collectionUid] = {
+          isMaster: false,
+          masterCollectionUid: null,
+          subscriberCollectionUids: []
+        };
+      }
+      state.environmentSync.syncRelationships[collectionUid].isMaster = isMaster;
+      // If disabling master, remove all subscriber relationships
+      if (!isMaster) {
+        const subscribers = state.environmentSync.syncRelationships[collectionUid].subscriberCollectionUids || [];
+        subscribers.forEach((subscriberUid) => {
+          if (state.environmentSync.syncRelationships[subscriberUid]) {
+            state.environmentSync.syncRelationships[subscriberUid].masterCollectionUid = null;
+          }
+        });
+        state.environmentSync.syncRelationships[collectionUid].subscriberCollectionUids = [];
+      }
+    },
+    subscribeToMasterEnvironments: (state, action) => {
+      const { subscriberCollectionUid, masterCollectionUid } = action.payload;
+
+      // Initialize subscriber config if needed
+      if (!state.environmentSync.syncRelationships[subscriberCollectionUid]) {
+        state.environmentSync.syncRelationships[subscriberCollectionUid] = {
+          isMaster: false,
+          masterCollectionUid: null,
+          subscriberCollectionUids: []
+        };
+      }
+
+      // Remove from previous master if exists
+      const prevMasterUid = state.environmentSync.syncRelationships[subscriberCollectionUid].masterCollectionUid;
+      if (prevMasterUid && state.environmentSync.syncRelationships[prevMasterUid]) {
+        const prevMaster = state.environmentSync.syncRelationships[prevMasterUid];
+        prevMaster.subscriberCollectionUids = prevMaster.subscriberCollectionUids.filter((uid) => uid !== subscriberCollectionUid);
+      }
+
+      // Set new master
+      state.environmentSync.syncRelationships[subscriberCollectionUid].masterCollectionUid = masterCollectionUid;
+      state.environmentSync.syncRelationships[subscriberCollectionUid].isMaster = false;
+
+      // Add to master's subscriber list
+      if (!state.environmentSync.syncRelationships[masterCollectionUid]) {
+        state.environmentSync.syncRelationships[masterCollectionUid] = {
+          isMaster: true,
+          masterCollectionUid: null,
+          subscriberCollectionUids: []
+        };
+      }
+      if (!state.environmentSync.syncRelationships[masterCollectionUid].subscriberCollectionUids.includes(subscriberCollectionUid)) {
+        state.environmentSync.syncRelationships[masterCollectionUid].subscriberCollectionUids.push(subscriberCollectionUid);
+      }
+    },
+    unsubscribeFromMaster: (state, action) => {
+      const { subscriberCollectionUid } = action.payload;
+
+      if (!state.environmentSync.syncRelationships[subscriberCollectionUid]) {
+        return;
+      }
+
+      const masterUid = state.environmentSync.syncRelationships[subscriberCollectionUid].masterCollectionUid;
+
+      // Remove from master's subscriber list
+      if (masterUid && state.environmentSync.syncRelationships[masterUid]) {
+        const master = state.environmentSync.syncRelationships[masterUid];
+        master.subscriberCollectionUids = master.subscriberCollectionUids.filter((uid) => uid !== subscriberCollectionUid);
+      }
+
+      // Clear subscriber's master reference
+      state.environmentSync.syncRelationships[subscriberCollectionUid].masterCollectionUid = null;
+    },
+    removeCollectionFromSync: (state, action) => {
+      const { collectionUid } = action.payload;
+
+      if (!state.environmentSync.syncRelationships[collectionUid]) {
+        return;
+      }
+
+      const config = state.environmentSync.syncRelationships[collectionUid];
+
+      // If it's a master, unsubscribe all subscribers
+      if (config.isMaster && config.subscriberCollectionUids) {
+        config.subscriberCollectionUids.forEach((subscriberUid) => {
+          if (state.environmentSync.syncRelationships[subscriberUid]) {
+            state.environmentSync.syncRelationships[subscriberUid].masterCollectionUid = null;
+          }
+        });
+      }
+
+      // If it's a subscriber, remove from master's list
+      if (config.masterCollectionUid && state.environmentSync.syncRelationships[config.masterCollectionUid]) {
+        const master = state.environmentSync.syncRelationships[config.masterCollectionUid];
+        master.subscriberCollectionUids = master.subscriberCollectionUids.filter((uid) => uid !== collectionUid);
+      }
+
+      // Remove the collection's sync config
+      delete state.environmentSync.syncRelationships[collectionUid];
+    },
+    loadEnvironmentSyncConfig: (state, action) => {
+      // Load sync config from persisted storage
+      state.environmentSync.syncRelationships = action.payload.syncRelationships || {};
     }
   }
 });
@@ -122,7 +232,12 @@ export const {
   updateSystemProxyEnvVariables,
   updateGenerateCode,
   toggleSidebarCollapse,
-  setClipboard
+  setClipboard,
+  setCollectionAsMaster,
+  subscribeToMasterEnvironments,
+  unsubscribeFromMaster,
+  removeCollectionFromSync,
+  loadEnvironmentSyncConfig
 } = appSlice.actions;
 
 export const savePreferences = (preferences) => (dispatch, getState) => {
@@ -192,6 +307,37 @@ export const copyRequest = (item) => (dispatch, getState) => {
   brunoClipboard.write(item);
   dispatch(setClipboard({ hasCopiedItems: true }));
   return Promise.resolve();
+};
+
+export const saveEnvironmentSyncConfig = () => (dispatch, getState) => {
+  return new Promise((resolve, reject) => {
+    const { ipcRenderer } = window;
+    const state = getState();
+    const syncConfig = {
+      syncRelationships: state.app.environmentSync.syncRelationships
+    };
+
+    ipcRenderer
+      .invoke('renderer:save-environment-sync-config', syncConfig)
+      .then(resolve)
+      .catch(reject);
+  });
+};
+
+export const loadEnvironmentSyncConfigFromStorage = () => (dispatch, getState) => {
+  return new Promise((resolve, reject) => {
+    const { ipcRenderer } = window;
+
+    ipcRenderer
+      .invoke('renderer:get-environment-sync-config')
+      .then((syncConfig) => {
+        if (syncConfig) {
+          dispatch(loadEnvironmentSyncConfig(syncConfig));
+        }
+        resolve(syncConfig);
+      })
+      .catch(reject);
+  });
 };
 
 export default appSlice.reducer;
