@@ -14,7 +14,6 @@ const config = {
   appId: 'com.usebruno.app',
   productName: productName,
   electronVersion: '37.6.1',
-  publish: [], // Disable auto-publishing to GitHub releases (empty array prevents publishing)
   buildVersion: version, // Use the git tag version
   directories: {
     buildResources: 'resources',
