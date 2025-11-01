@@ -235,9 +235,9 @@ const Info = ({ collection }) => {
               <IconShare className="w-5 h-5 text-indigo-500" stroke={1.5} />
             </div>
             <div className="ml-4 h-full flex flex-col justify-start">
-              <div className="font-semibold text-sm h-fit my-auto">Share</div>
+              <div className="font-semibold text-sm h-fit my-auto">Export</div>
               <div className="mt-1 text-sm group-hover:underline text-link">
-                Share Collection
+                Export Collection
               </div>
             </div>
           </div>
