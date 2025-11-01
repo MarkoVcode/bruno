@@ -55,15 +55,16 @@ async function syncCollectionFromUrl(collectionPath, mainWindow, lastOpenedColle
   const collectionLocation = path.dirname(collectionPath);
   const collectionFolderName = path.basename(collectionPath);
 
-  // Delete the entire collection directory
-  await fsExtra.remove(collectionPath);
-
   // Re-import the collection using the utility function
   // We need to convert the OpenAPI spec to Bruno format first
-  const { convertOpenapiToBruno } = require('@usebruno/converters');
+  const brunoConverters = require('@usebruno/converters');
+  const { openApiToBruno } = brunoConverters;
 
   // Use the same grouping type as before (default to 'tags')
-  const collection = convertOpenapiToBruno(spec, { groupBy: 'tags' });
+  const collection = openApiToBruno(spec, { groupBy: 'tags' });
+
+  // Delete the entire collection directory
+  await fsExtra.remove(collectionPath);
 
   // Import the collection with the same folder name
   await importCollection(collection, collectionLocation, mainWindow, lastOpenedCollections, collectionFolderName, spec, format, sourceUrl);
