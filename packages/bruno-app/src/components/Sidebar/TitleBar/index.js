@@ -69,10 +69,6 @@ const TitleBar = () => {
     );
   };
 
-  const openDevTools = () => {
-    ipcRenderer.invoke('renderer:open-devtools');
-  };
-
   return (
     <StyledWrapper className="px-2 py-2">
       {createCollectionModalOpen ? <CreateCollection onClose={() => setCreateCollectionModalOpen(false)} /> : null}
@@ -122,15 +118,6 @@ const TitleBar = () => {
               }}
             >
               Import Collection
-            </div>
-            <div
-              className="dropdown-item"
-              onClick={(e) => {
-                menuDropdownTippyRef.current.hide();
-                openDevTools();
-              }}
-            >
-              Devtools
             </div>
           </Dropdown>
         </div>
