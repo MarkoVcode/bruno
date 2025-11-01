@@ -47,14 +47,24 @@ const EnvironmentSettings = ({ collection, onClose }) => {
   const { environments } = collection;
   const [selectedEnvironment, setSelectedEnvironment] = useState(null);
   const [tab, setTab] = useState('default');
+
+  // Handler for closing create/import modals
+  const handleCreateOrImportClose = () => {
+    // Only reset tab if there are still no environments
+    // If an environment was created, the component will re-render to show EnvironmentList
+    if (!environments || !environments.length) {
+      setTab('default');
+    }
+  };
+
   if (!environments || !environments.length) {
     return (
       <StyledWrapper>
         <Modal size="md" title="Environments" handleCancel={onClose} hideCancel={true} hideFooter={true}>
           {tab === 'create' ? (
-            <CreateEnvironment collection={collection} onClose={() => setTab('default')} />
+            <CreateEnvironment collection={collection} onClose={handleCreateOrImportClose} />
           ) : tab === 'import' ? (
-            <ImportEnvironment collection={collection} onClose={() => setTab('default')} />
+            <ImportEnvironment collection={collection} onClose={handleCreateOrImportClose} />
           ) : (
             <DefaultTab setTab={setTab} />
           )}
