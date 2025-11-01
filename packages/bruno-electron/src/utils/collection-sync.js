@@ -63,15 +63,25 @@ async function syncCollectionFromUrl(collectionPath, mainWindow, lastOpenedColle
   // Use the same grouping type as before (default to 'tags')
   const collection = openApiToBruno(spec, { groupBy: 'tags' });
 
+  // Store the UID before deletion (we'll need it for reopening)
+  const { generateUidBasedOnHash } = require('./common');
+  const originalUid = generateUidBasedOnHash(collectionPath);
+
   // Delete the entire collection directory
   await fsExtra.remove(collectionPath);
 
+  // Small delay to ensure file watcher processes the deletion
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
   // Import the collection with the same folder name
-  await importCollection(collection, collectionLocation, mainWindow, lastOpenedCollections, collectionFolderName, spec, format, sourceUrl);
+  // This will create the collection and send main:collection-opened event
+  const { uid } = await importCollection(collection, collectionLocation, mainWindow, lastOpenedCollections, collectionFolderName, spec, format, sourceUrl);
 
   return {
     success: true,
-    message: `Collection successfully synced from ${sourceUrl}`
+    message: `Collection successfully synced from ${sourceUrl}`,
+    collectionPath: path.join(collectionLocation, collectionFolderName),
+    uid
   };
 }
 
