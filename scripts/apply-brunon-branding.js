@@ -67,21 +67,16 @@ try {
     if (content.includes('BrunoN')) {
       return content;
     }
-    // This is inside a template literal, so we need to match the exact string
-    // The ${version} in the file is a template expression, not plain text
-    const marker = 'Bruno ${version}';
+    // The file now uses ${productName} variable which gets set at runtime
+    // We need to update the function signature to default to 'BrunoN' instead of 'Bruno'
+    const marker = "productName = 'Bruno'";
     if (!content.includes(marker)) {
       throw new Error('Unable to find about window title');
     }
-    // Replace just "Bruno" with "BrunoN" in the title
+    // Change default product name from 'Bruno' to 'BrunoN'
     let updated = content.replace(
-      '<h2 class="title">Bruno ${version}</h2>',
-      '<h2 class="title">BrunoN ${version}</h2>'
-    );
-    // Add edition note after the title
-    updated = updated.replace(
-      '<h2 class="title">BrunoN ${version}</h2>',
-      '<h2 class="title">BrunoN ${version}</h2>\n      <div class="description">BrunoN edition</div>'
+      "productName = 'Bruno'",
+      "productName = 'BrunoN'"
     );
     return updated;
   });
