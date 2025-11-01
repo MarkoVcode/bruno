@@ -10,6 +10,33 @@ const version = process.env.BRUNON_GIT_TAG
   ? process.env.BRUNON_GIT_TAG.replace(/^v/, '')
   : require('./package.json').version;
 
+// macOS code signing configuration
+// BrunoN builds are unsigned (no Apple Developer account)
+// Bruno builds use proper code signing with notarization
+const macConfig = {
+  artifactName: '${productName}_${buildVersion}_${arch}_${os}.${ext}',
+  category: 'public.app-category.developer-tools',
+  target: [
+    {
+      target: 'dmg',
+      arch: ['x64', 'arm64']
+    },
+    {
+      target: 'zip',
+      arch: ['x64', 'arm64']
+    }
+  ],
+  icon: 'resources/icons/mac/icon.icns'
+};
+
+// Only add code signing configuration for official Bruno builds
+if (!isBrunoNRelease) {
+  macConfig.hardenedRuntime = true;
+  macConfig.identity = 'Anoop MD (W7LPPWA48L)';
+  macConfig.entitlements = 'resources/entitlements.mac.plist';
+  macConfig.entitlementsInherit = 'resources/entitlements.mac.plist';
+}
+
 const config = {
   appId: 'com.usebruno.app',
   productName: productName,
@@ -26,26 +53,9 @@ const config = {
     }
   ],
   files: ['**/*'],
-  afterSign: 'notarize.js',
-  mac: {
-    artifactName: '${productName}_${buildVersion}_${arch}_${os}.${ext}',
-    category: 'public.app-category.developer-tools',
-    target: [
-      {
-        target: 'dmg',
-        arch: ['x64', 'arm64']
-      },
-      {
-        target: 'zip',
-        arch: ['x64', 'arm64']
-      }
-    ],
-    icon: 'resources/icons/mac/icon.icns',
-    hardenedRuntime: true,
-    identity: 'Anoop MD (W7LPPWA48L)',
-    entitlements: 'resources/entitlements.mac.plist',
-    entitlementsInherit: 'resources/entitlements.mac.plist'
-  },
+  // Only enable notarization for official Bruno builds
+  afterSign: isBrunoNRelease ? undefined : 'notarize.js',
+  mac: macConfig,
   linux: {
     artifactName: '${productName}_${buildVersion}_${arch}_linux.${ext}',
     icon: 'resources/icons/png',
