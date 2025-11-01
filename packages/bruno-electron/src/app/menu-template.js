@@ -1,8 +1,13 @@
-const { ipcMain } = require('electron');
+const { ipcMain, app } = require('electron');
 const os = require('os');
 const { BrowserWindow } = require('electron');
-const { version } = require('../../package.json');
 const aboutBruno = require('./about-bruno');
+
+// Get version from app (which uses buildVersion from electron-builder config)
+// This ensures the About dialog shows the git tag version instead of package.json version
+const version = app.getVersion();
+// Get product name (Bruno or BrunoN) from app
+const productName = app.getName();
 
 const template = [
   {
@@ -87,7 +92,7 @@ const template = [
             },
           });
           aboutWindow.removeMenu();
-          aboutWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(aboutBruno({version}))}`);
+          aboutWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(aboutBruno({ version, productName }))}`);
         }
       },
       { label: 'Documentation', click: () => ipcMain.emit('main:open-docs') }

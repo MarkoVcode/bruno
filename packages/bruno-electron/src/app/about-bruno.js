@@ -1,4 +1,4 @@
-module.exports = function aboutBruno({version}) {
+module.exports = function aboutBruno({ version, productName = 'Bruno' }) {
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -166,7 +166,7 @@ module.exports = function aboutBruno({version}) {
             />
           </g>
         </svg>
-      <h2 class="title">Bruno ${version}</h2>
+      <h2 class="title">${productName} ${version}</h2>
       <footer class="footer">
           ©2025 Bruno Software Inc
       </footer>
