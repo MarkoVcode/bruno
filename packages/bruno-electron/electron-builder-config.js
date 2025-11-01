@@ -4,11 +4,18 @@ require('dotenv').config({ path: process.env.DOTENV_PATH });
 const isBrunoNRelease = process.env.BRUNON_RELEASE === 'true';
 const productName = isBrunoNRelease ? 'BrunoN' : 'Bruno';
 
+// Get version from BRUNON_GIT_TAG environment variable (set by build script)
+// Format: v1.0.0 -> 1.0.0
+const version = process.env.BRUNON_GIT_TAG
+  ? process.env.BRUNON_GIT_TAG.replace(/^v/, '')
+  : require('./package.json').version;
+
 const config = {
   appId: 'com.usebruno.app',
   productName: productName,
   electronVersion: '37.6.1',
   publish: null, // Disable auto-publishing to GitHub releases
+  buildVersion: version, // Use the git tag version
   directories: {
     buildResources: 'resources',
     output: 'out'
@@ -22,7 +29,7 @@ const config = {
   files: ['**/*'],
   afterSign: 'notarize.js',
   mac: {
-    artifactName: '${name}_${version}_${arch}_${os}.${ext}',
+    artifactName: '${productName}_${version}_${arch}_${os}.${ext}',
     category: 'public.app-category.developer-tools',
     target: [
       {
@@ -41,7 +48,7 @@ const config = {
     entitlementsInherit: 'resources/entitlements.mac.plist'
   },
   linux: {
-    artifactName: '${name}_${version}_${arch}_linux.${ext}',
+    artifactName: '${productName}_${version}_${arch}_linux.${ext}',
     icon: 'resources/icons/png',
     target: ['AppImage', 'deb', 'snap', 'rpm']
   },
@@ -61,7 +68,7 @@ const config = {
     ]
   },
   win: {
-    artifactName: '${name}_${version}_${arch}_win.${ext}',
+    artifactName: '${productName}_${version}_${arch}_win.${ext}',
     icon: 'resources/icons/win/icon.ico',
     target: [
       {
