@@ -74,55 +74,37 @@ const EnvironmentListContent = ({
       {environments && environments.length > 0 ? (
         <>
           {/* Search input */}
-          <div className="environment-search px-2 py-2 border-b" style={{ position: 'relative' }}>
-            <div style={{ position: 'relative' }}>
-              <div
-                style={{
-                  position: 'absolute',
-                  left: '8px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  pointerEvents: 'none',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-              >
-                <IconSearch size={14} strokeWidth={1.5} />
-              </div>
-              <input
-                type="text"
-                placeholder="Search environments..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                style={{
-                  width: '100%',
-                  paddingLeft: '28px',
-                  paddingRight: searchText ? '28px' : '8px',
-                  paddingTop: '4px',
-                  paddingBottom: '4px',
-                  fontSize: '0.875rem',
-                  border: '1px solid rgba(0,0,0,0.1)',
-                  borderRadius: '4px'
-                }}
-                className="environment-search-input"
-              />
-              {searchText && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    right: '8px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center'
-                  }}
-                  onClick={() => setSearchText('')}
-                >
-                  <IconX size={14} strokeWidth={1.5} />
-                </div>
-              )}
+          <div className="mt-2 relative environment-filter px-2">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span className="text-gray-500 sm:text-sm">
+                <IconSearch size={16} strokeWidth={1.5} />
+              </span>
             </div>
+            <input
+              type="text"
+              name="search-environments"
+              placeholder="Search environments …"
+              id="search-environments"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+              className="block w-full pl-7 py-1 sm:text-sm"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+            {searchText !== '' && (
+              <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                <span
+                  className="close-icon"
+                  onClick={() => {
+                    setSearchText('');
+                  }}
+                >
+                  <IconX size={16} strokeWidth={1.5} className="cursor-pointer" />
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="environment-list">
