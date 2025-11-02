@@ -137,10 +137,26 @@ const Wrapper = styled.div`
     overflow: hidden;
   }
 
+  .environment-filter {
+    input {
+      border: ${(props) => props.theme.sidebar.search.border};
+      border-radius: 2px;
+      background-color: ${(props) => props.theme.sidebar.search.bg};
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    span.close-icon {
+      color: ${(props) => props.theme.colors.text.muted};
+    }
+  }
+
   .environment-list {
     flex: 1;
     overflow-y: auto;
-    max-height: calc(75vh - 8rem); 
+    max-height: calc(75vh - 8rem);
     padding-bottom: 2.625rem;
   }
 
