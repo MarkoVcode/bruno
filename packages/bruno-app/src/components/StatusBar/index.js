@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { IconSettings, IconCookie, IconTool, IconSearch } from '@tabler/icons';
+import { IconSettings, IconCookie, IconTool, IconSearch, IconHistory } from '@tabler/icons';
 import Mousetrap from 'mousetrap';
 import { getKeyBindingsForActionAllOS } from 'providers/Hotkeys/keyMappings';
 import ToolHint from 'components/ToolHint';
@@ -11,6 +11,7 @@ import Notifications from 'components/Notifications';
 import Portal from 'components/Portal';
 import { showPreferences, toggleSidebarCollapse } from 'providers/ReduxStore/slices/app';
 import { openConsole } from 'providers/ReduxStore/slices/logs';
+import { toggleHistory } from 'providers/ReduxStore/slices/history';
 import { useApp } from 'providers/App';
 import StyledWrapper from './StyledWrapper';
 
@@ -19,6 +20,7 @@ const StatusBar = () => {
   const preferencesOpen = useSelector((state) => state.app.showPreferences);
   const logs = useSelector((state) => state.logs.logs);
   const sidebarCollapsed = useSelector((state) => state.app.sidebarCollapsed);
+  const isHistoryOpen = useSelector((state) => state.history.isHistoryOpen);
   const [cookiesOpen, setCookiesOpen] = useState(false);
   const { version } = useApp();
 
@@ -26,6 +28,10 @@ const StatusBar = () => {
 
   const handleConsoleClick = () => {
     dispatch(openConsole());
+  };
+
+  const handleHistoryClick = () => {
+    dispatch(toggleHistory());
   };
 
   const openGlobalSearch = () => {
@@ -127,7 +133,20 @@ const StatusBar = () => {
                 <span className="console-label">Cookies</span>
               </div>
             </button>
-            
+
+            <button
+              className={`status-bar-button ${isHistoryOpen ? 'active' : ''}`}
+              data-trigger="history"
+              onClick={handleHistoryClick}
+              tabIndex={0}
+              aria-label="Request History"
+            >
+              <div className="console-button-content">
+                <IconHistory size={16} strokeWidth={1.5} aria-hidden="true" />
+                <span className="console-label">History</span>
+              </div>
+            </button>
+
             <button
               className={`status-bar-button ${errorCount > 0 ? 'has-errors' : ''}`}
               data-trigger="dev-tools"

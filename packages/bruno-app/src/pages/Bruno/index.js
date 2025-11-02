@@ -13,6 +13,7 @@ import 'codemirror/theme/material.css';
 import 'codemirror/theme/monokai.css';
 import 'codemirror/addon/scroll/simplescrollbars.css';
 import Devtools from 'components/Devtools';
+import RequestHistory from 'components/RequestHistory';
 import useGrpcEventListeners from 'utils/network/grpc-event-listeners';
 import useWsEventListeners from 'utils/network/ws-event-listeners';
 import Portal from 'components/Portal';
@@ -54,6 +55,7 @@ export default function Main() {
   const isDragging = useSelector((state) => state.app.isDragging);
   const showHomePage = useSelector((state) => state.app.showHomePage);
   const isConsoleOpen = useSelector((state) => state.logs.isConsoleOpen);
+  const isHistoryOpen = useSelector((state) => state.history.isHistoryOpen);
   const mainSectionRef = useRef(null);
   const [showRosettaBanner, setShowRosettaBanner] = useState(false);
 
@@ -124,6 +126,7 @@ export default function Main() {
         </div>
 
         <Devtools mainSectionRef={mainSectionRef} />
+      <RequestHistory mainSectionRef={mainSectionRef} />
         <StatusBar />
       </div>
     // </ErrorCapture>

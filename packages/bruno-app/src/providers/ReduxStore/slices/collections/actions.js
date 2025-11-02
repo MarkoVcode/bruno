@@ -48,6 +48,8 @@ import {
 
 import { each } from 'lodash';
 import { closeAllCollectionTabs, updateResponsePaneScrollPosition } from 'providers/ReduxStore/slices/tabs';
+import { addHistoryEntry } from 'providers/ReduxStore/slices/history';
+import { addHistoryEntry as saveHistoryEntry } from 'utils/ipc/request-history';
 import { resolveRequestFilename } from 'utils/common/platform';
 import { parsePathParams, splitOnFirst } from 'utils/url/index';
 import { sendCollectionOauth2Request as _sendCollectionOauth2Request } from 'utils/network/index';
@@ -345,13 +347,37 @@ export const sendRequest = (item, collectionUid) => (dispatch, getState) => {
             }))
           };
 
-          return dispatch(
-            responseReceived({
+          dispatch(responseReceived({
               itemUid,
               collectionUid,
               response: serializedResponse
             })
           );
+
+          // Capture history entry
+          const historyEntry = {
+            timestamp: Date.now(),
+            collectionName: collectionCopy.name,
+            collectionUid: collectionCopy.uid,
+            resourceName: itemCopy.name,
+            itemUid: itemCopy.uid,
+            method: itemCopy.request.method,
+            configuredUrl: itemCopy.request.url,
+            actualUrl: serializedResponse.url,
+            status: serializedResponse.status,
+            statusText: serializedResponse.statusText || '',
+            duration: serializedResponse.duration || 0
+          };
+
+          // Add to Redux state (in-memory)
+          dispatch(addHistoryEntry(historyEntry));
+
+          // Save to electron-store (persistent)
+          saveHistoryEntry(historyEntry).catch((err) => {
+            console.error('Failed to save history entry:', err);
+          });
+
+          return serializedResponse;
         })
         .then(resolve)
         .catch((err) => {
