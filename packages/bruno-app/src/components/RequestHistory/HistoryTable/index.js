@@ -17,19 +17,6 @@ const HistoryTable = () => {
     const oneDayMs = 24 * 60 * 60 * 1000;
 
     history.forEach((entry) => {
-      // Debug: log entry to see what data we have
-      if (entry.actualUrl) {
-        console.log('[HistoryTable] Entry with actualUrl:', {
-          configuredUrl: entry.configuredUrl,
-          actualUrl: entry.actualUrl
-        });
-      } else {
-        console.log('[HistoryTable] Entry WITHOUT actualUrl:', {
-          configuredUrl: entry.configuredUrl,
-          entryKeys: Object.keys(entry)
-        });
-      }
-
       const entryDate = new Date(entry.timestamp);
       const dayKey = entryDate.toDateString();
 

@@ -369,13 +369,6 @@ export const sendRequest = (item, collectionUid) => (dispatch, getState) => {
             duration: serializedResponse.duration || 0
           };
 
-          console.log('[History] Captured entry:', {
-            configuredUrl: historyEntry.configuredUrl,
-            actualUrl: historyEntry.actualUrl,
-            hasUrl: !!serializedResponse.url,
-            responseKeys: Object.keys(serializedResponse)
-          });
-
           // Add to Redux state (in-memory)
           dispatch(addHistoryEntry(historyEntry));
 
