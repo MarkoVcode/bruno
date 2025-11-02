@@ -1,4 +1,4 @@
-import React, { useState, useRef, forwardRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { IconCaretDown } from '@tabler/icons';
 import Dropdown from 'components/Dropdown';
 import StyledWrapper from './StyledWrapper';
@@ -17,10 +17,7 @@ function Verb({ verb, onSelect }) {
   );
 }
 
-const Icon = forwardRef(function IconComponent(
-  { isCustomMode, inputValue, handleInputChange, handleBlur, handleKeyDown, inputRef },
-  ref
-) {
+function Icon({ isCustomMode, inputValue, handleInputChange, handleBlur, handleKeyDown, inputRef }) {
   if (isCustomMode) {
     return (
       <div className="flex flex-col w-full">
@@ -40,7 +37,7 @@ const Icon = forwardRef(function IconComponent(
   }
 
   return (
-    <div ref={ref} className="flex pr-4 select-none">
+    <div className="flex pr-4 select-none">
       <button
         type="button"
         className="cursor-pointer flex items-center text-left w-full"
@@ -56,7 +53,7 @@ const Icon = forwardRef(function IconComponent(
       </button>
     </div>
   );
-});
+}
 
 const HttpMethodSelector = ({ method = DEFAULT_METHOD, onMethodSelect }) => {
   const [isCustomMode, setIsCustomMode] = useState(false);

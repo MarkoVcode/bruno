@@ -1,4 +1,4 @@
-import React, { useRef, forwardRef } from 'react';
+import React, { useRef } from 'react';
 import { IconCaretDown } from '@tabler/icons';
 import Dropdown from 'components/Dropdown';
 import { humanizeRequestBodyMode } from 'utils/collections';
@@ -23,15 +23,15 @@ const WSRequestBodyMode = ({ mode, onModeChange }) => {
   const dropdownTippyRef = useRef();
   const onDropdownCreate = (ref) => (dropdownTippyRef.current = ref);
 
-  const Icon = forwardRef((props, ref) => {
+  const Icon = () => {
     return (
-      <div ref={ref} className="flex items-center justify-center pl-3 py-1 select-none selected-body-mode">
+      <div className="flex items-center justify-center pl-3 py-1 select-none selected-body-mode">
         {humanizeRequestBodyMode(mode)}
         {' '}
         <IconCaretDown className="caret ml-2" size={14} strokeWidth={2} />
       </div>
     );
-  });
+  };
 
   return (
     <StyledWrapper>

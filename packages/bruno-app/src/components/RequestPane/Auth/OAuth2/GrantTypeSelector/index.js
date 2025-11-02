@@ -1,4 +1,4 @@
-import React, { useRef, forwardRef } from 'react';
+import React, { useRef } from 'react';
 import get from 'lodash/get';
 import Dropdown from 'components/Dropdown';
 import { useDispatch } from 'react-redux';
@@ -17,13 +17,13 @@ const GrantTypeSelector = ({ item = {}, request, updateAuth, collection }) => {
   });
   const onDropdownCreate = (ref) => (dropdownTippyRef.current = ref);
 
-  const Icon = forwardRef((props, ref) => {
+  const Icon = () => {
     return (
-      <div ref={ref} className="flex items-center justify-end grant-type-label select-none">
+      <div className="flex items-center justify-end grant-type-label select-none">
         {humanizeGrantType(oAuth?.grantType)} <IconCaretDown className="caret ml-1 mr-1" size={14} strokeWidth={2} />
       </div>
     );
-  });
+  };
 
   const onGrantTypeChange = (grantType) => {
     let updatedValues = {

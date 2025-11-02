@@ -1,4 +1,4 @@
-import React, { useRef, forwardRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import get from 'lodash/get';
 import { IconCaretDown } from '@tabler/icons';
@@ -23,14 +23,14 @@ const ApiKeyAuth = ({ item, collection, updateAuth, request, save }) => {
     save();
   };
 
-  const Icon = forwardRef((props, ref) => {
+  const Icon = () => {
     return (
-      <div ref={ref} className="flex items-center justify-end auth-type-label select-none">
+      <div className="flex items-center justify-end auth-type-label select-none">
         {humanizeRequestAPIKeyPlacement(apikeyAuth?.placement)}
         <IconCaretDown className="caret ml-1 mr-1" size={14} strokeWidth={2} />
       </div>
     );
-  });
+  };
 
   const handleAuthChange = (property, value) => {
     dispatch(

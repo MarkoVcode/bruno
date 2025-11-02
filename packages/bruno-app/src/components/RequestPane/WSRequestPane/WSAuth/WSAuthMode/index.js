@@ -1,4 +1,4 @@
-import React, { useRef, forwardRef } from 'react';
+import React, { useRef } from 'react';
 import get from 'lodash/get';
 import { IconCaretDown } from '@tabler/icons';
 import Dropdown from 'components/Dropdown';
@@ -40,15 +40,15 @@ const WSAuthMode = ({ item, collection }) => {
   const onDropdownCreate = (ref) => (dropdownTippyRef.current = ref);
   const authMode = item.draft ? get(item, 'draft.request.auth.mode') : get(item, 'request.auth.mode');
 
-  const Icon = forwardRef((props, ref) => {
+  const Icon = () => {
     return (
-      <div ref={ref} className="flex items-center justify-center auth-mode-label select-none">
+      <div className="flex items-center justify-center auth-mode-label select-none">
         {humanizeRequestAuthMode(authMode)}
         {' '}
         <IconCaretDown className="caret ml-1 mr-1" size={14} strokeWidth={2} />
       </div>
     );
-  });
+  };
 
   const onModeChange = (value) => {
     dispatch(updateRequestAuthMode({

@@ -41,14 +41,14 @@ const NewRequest = ({ collectionUid, item, isEphemeral, onClose }) => {
   const advancedDropdownTippyRef = useRef();
   const onAdvancedDropdownCreate = (ref) => (advancedDropdownTippyRef.current = ref);
 
-  const Icon = forwardRef((props, ref) => {
+  const Icon = () => {
     return (
-      <div ref={ref} className="flex items-center justify-end auth-type-label select-none">
+      <div className="flex items-center justify-end auth-type-label select-none">
         {curlRequestTypeDetected === 'http-request' ? 'HTTP' : 'GraphQL'}
         <IconCaretDown className="caret ml-1 mr-1" size={14} strokeWidth={2} />
       </div>
     );
-  });
+  };
 
   // This function analyzes a given cURL command string and determines whether the request is a GraphQL or HTTP request.
   const identifyCurlRequestType = (url, headers, body) => {

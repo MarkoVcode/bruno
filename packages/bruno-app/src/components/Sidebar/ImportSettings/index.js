@@ -22,11 +22,10 @@ const ImportSettings = ({
     dropdownTippyRef.current = ref;
   };
 
-  const GroupingDropdownIcon = forwardRef((props, ref) => {
+  const GroupingDropdownIcon = () => {
     const selectedOption = groupingOptions.find((option) => option.value === groupingType);
     return (
       <div
-        ref={ref}
         className="flex items-center justify-between w-full current-group"
         data-testid="grouping-dropdown"
       >
@@ -36,7 +35,7 @@ const ImportSettings = ({
         <IconCaretDown size={16} className="text-gray-400 ml-[0.25rem]" fill="currentColor" />
       </div>
     );
-  });
+  };
 
   return (
     <Portal>

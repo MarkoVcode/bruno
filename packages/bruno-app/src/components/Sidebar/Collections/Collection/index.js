@@ -45,13 +45,13 @@ const Collection = ({ collection, searchText, isIndented = false, isMaster = fal
   const { hasCopiedItems } = useSelector((state) => state.app.clipboard);
   const menuDropdownTippyRef = useRef();
   const onMenuDropdownCreate = (ref) => (menuDropdownTippyRef.current = ref);
-  const MenuIcon = forwardRef((_props, ref) => {
+  const MenuIcon = () => {
     return (
-      <div ref={ref} className="pr-2">
+      <div className="pr-2">
         <IconDots size={22} />
       </div>
     );
-  });
+  };
 
   const handleRun = () => {
     dispatch(

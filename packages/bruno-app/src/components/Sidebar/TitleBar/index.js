@@ -50,13 +50,13 @@ const TitleBar = () => {
 
   const menuDropdownTippyRef = useRef();
   const onMenuDropdownCreate = (ref) => (menuDropdownTippyRef.current = ref);
-  const MenuIcon = forwardRef((props, ref) => {
+  const MenuIcon = () => {
     return (
-      <div ref={ref} className="dropdown-icon cursor-pointer">
+      <div className="dropdown-icon cursor-pointer">
         <IconDots size={22} />
       </div>
     );
-  });
+  };
 
   const handleTitleClick = () => dispatch(showHomePage());
 

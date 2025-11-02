@@ -18,13 +18,13 @@ const RequestBodyMode = ({ item, collection }) => {
   const body = item.draft ? get(item, 'draft.request.body') : get(item, 'request.body');
   const bodyMode = body?.mode;
 
-  const Icon = forwardRef((props, ref) => {
+  const Icon = () => {
     return (
-      <div ref={ref} className="flex items-center justify-center pl-3 py-1 select-none selected-body-mode">
+      <div className="flex items-center justify-center pl-3 py-1 select-none selected-body-mode">
         {humanizeRequestBodyMode(bodyMode)} <IconCaretDown className="caret ml-2" size={14} strokeWidth={2} />
       </div>
     );
-  });
+  };
 
   const onModeChange = (value) => {
     dispatch(

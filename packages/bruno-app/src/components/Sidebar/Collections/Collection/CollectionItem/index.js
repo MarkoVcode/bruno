@@ -150,13 +150,13 @@ const CollectionItem = ({ item, collectionUid, collectionPathname, searchText })
   });
 
   const dropdownTippyRef = useRef();
-  const MenuIcon = forwardRef((props, ref) => {
+  const MenuIcon = () => {
     return (
-      <div ref={ref}>
+      <div>
         <IconDots size={22} />
       </div>
     );
-  });
+  };
 
   const iconClassName = classnames({
     'rotate-90': !itemIsCollapsed
