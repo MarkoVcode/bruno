@@ -18,7 +18,10 @@ const Dropdown = ({ icon, children, onCreate, placement, transparent, visible, .
         onCreate={onCreate}
         {...tippyProps}
       >
-        {icon}
+        {/* Wrap icon in a span to avoid React 19 ref access warnings with Tippy.js */}
+        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+          {icon}
+        </span>
       </Tippy>
     </StyledWrapper>
   );
