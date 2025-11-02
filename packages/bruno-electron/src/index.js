@@ -113,7 +113,7 @@ app.on('ready', async () => {
       preload: path.join(__dirname, 'preload.js'),
       webviewTag: true
     },
-    title: 'Bruno',
+    title: 'BrunoN',
     icon: path.join(__dirname, 'about/256x256.png')
     // we will bring this back
     // see https://github.com/usebruno/bruno/issues/440

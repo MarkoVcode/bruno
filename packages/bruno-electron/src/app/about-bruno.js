@@ -15,6 +15,23 @@ module.exports = function aboutBruno({ version, productName = 'Bruno' }) {
                 background-color: #f4f4f4;
                 color: #333;
             }
+
+            @media (prefers-color-scheme: dark) {
+                body {
+                    background-color: #1e1e1e;
+                    color: #e0e0e0;
+                }
+                .title {
+                    color: #e0e0e0;
+                }
+                .description {
+                    color: #e0e0e0;
+                }
+                .footer {
+                    color: #b0b0b0;
+                }
+            }
+
             .logo {
                 margin-top: 0px;
             }
