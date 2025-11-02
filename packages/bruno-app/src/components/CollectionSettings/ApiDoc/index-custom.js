@@ -4,6 +4,7 @@ import { addTab, focusTab } from 'providers/ReduxStore/slices/tabs';
 import { findItemInCollection, findCollectionByUid } from 'utils/collections';
 import { useSelector } from 'react-redux';
 import StyledWrapper from './StyledWrapper';
+import '@usebruno/openapi-docs/dist/esm/index.css';
 
 const ApiDocCustom = ({ collection }) => {
   const [error, setError] = useState(null);
