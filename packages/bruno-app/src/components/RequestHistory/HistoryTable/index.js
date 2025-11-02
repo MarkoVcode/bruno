@@ -152,7 +152,7 @@ const HistoryTable = () => {
                         <div className="configured-url" title={entry.configuredUrl}>
                           {entry.configuredUrl}
                         </div>
-                        {entry.actualUrl && entry.actualUrl !== entry.configuredUrl && (
+                        {entry.actualUrl && (
                           <div className="actual-url" title={entry.actualUrl}>
                             → {entry.actualUrl}
                           </div>

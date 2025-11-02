@@ -54,10 +54,6 @@ const StyledWrapper = styled.div`
     background-color: ${(props) => props.theme.bgSecondary};
     border-radius: 4px;
     margin-bottom: 8px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    backdrop-filter: blur(8px);
   }
 
   .day-title {
@@ -83,7 +79,7 @@ const StyledWrapper = styled.div`
     thead {
       background-color: ${(props) => props.theme.bgHeader};
       position: sticky;
-      top: 40px;
+      top: 0;
       z-index: 5;
 
       th {
@@ -91,6 +87,7 @@ const StyledWrapper = styled.div`
         text-align: left;
         font-weight: 600;
         color: ${(props) => props.theme.textMuted};
+        background-color: ${(props) => props.theme.bgHeader};
         border-bottom: 1px solid ${(props) => props.theme.border};
         white-space: nowrap;
       }
