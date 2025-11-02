@@ -368,7 +368,7 @@ const Collection = ({ collection, searchText, isIndented = false, isMaster = fal
                 setShowShareCollectionModal(true);
               }}
             >
-              Share
+              Export
             </div>
             <div
               className="dropdown-item"
@@ -386,16 +386,7 @@ const Collection = ({ collection, searchText, isIndented = false, isMaster = fal
                 setShowRemoveCollectionModal(true);
               }}
             >
-              Close
-            </div>
-            <div
-              className="dropdown-item"
-              onClick={(_e) => {
-                menuDropdownTippyRef.current.hide();
-                viewCollectionSettings();
-              }}
-            >
-              Settings
+              Detach
             </div>
           </Dropdown>
         </div>

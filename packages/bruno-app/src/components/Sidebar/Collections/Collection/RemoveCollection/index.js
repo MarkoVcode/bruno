@@ -13,21 +13,21 @@ const RemoveCollection = ({ onClose, collectionUid }) => {
   const onConfirm = () => {
     dispatch(removeCollection(collection.uid))
       .then(() => {
-        toast.success('Collection closed');
+        toast.success('Collection detached');
         onClose();
       })
-      .catch(() => toast.error('An error occurred while closing the collection'));
+      .catch(() => toast.error('An error occurred while detaching the collection'));
   };
 
   return (
-    <Modal size="sm" title="Close Collection" confirmText="Close" handleConfirm={onConfirm} handleCancel={onClose}>
+    <Modal size="sm" title="Detach Collection" confirmText="Detach" handleConfirm={onConfirm} handleCancel={onClose}>
       <div className="flex items-center">
         <IconFiles size={18} strokeWidth={1.5} />
         <span className="ml-2 mr-4 font-semibold">{collection.name}</span>
       </div>
       <div className="break-words text-xs mt-1">{collection.pathname}</div>
       <div className="mt-4">
-        Are you sure you want to close collection <span className="font-semibold">{collection.name}</span> in Bruno?
+        Are you sure you want to detach collection <span className="font-semibold">{collection.name}</span> from BrunoN?
       </div>
       <div className="mt-4">
         It will still be available in the file system at the above location and can be re-opened later.
