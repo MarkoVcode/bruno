@@ -75,7 +75,7 @@ export const exportEnvironment = (environment, options = {}) => {
 export const exportEnvironments = (environments, collectionName, options = {}) => {
   const { includeSecrets = false } = options;
 
-  const envsCopy = environments.map(env => {
+  const envsCopy = environments.map((env) => {
     const envCopy = JSON.parse(JSON.stringify(env));
     delete envCopy.uid;
     deleteUidsInVariables(envCopy.variables || []);

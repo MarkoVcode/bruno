@@ -249,7 +249,7 @@ describe('Collection Environment Integration Tests', () => {
         items: [],
         environments: [
           {
-            name: 'Dev',
+            name: 'Dev'
             // Missing variables field
           }
         ]
@@ -358,10 +358,8 @@ describe('Collection Environment Integration Tests', () => {
       exportCollection(collection);
 
       expect(FileSaver.saveAs).toHaveBeenCalledTimes(1);
-      expect(FileSaver.saveAs).toHaveBeenCalledWith(
-        expect.any(Blob),
-        'Export Test.json'
-      );
+      expect(FileSaver.saveAs).toHaveBeenCalledWith(expect.any(Blob),
+        'Export Test.json');
     });
 
     test('should generate correct filename for export', () => {
@@ -510,12 +508,8 @@ describe('Collection Environment Integration Tests', () => {
       expect(reimported.version).toBe(collection.version);
       expect(reimported.type).toBe(collection.type);
       expect(reimported.environments[0].name).toBe(collection.environments[0].name);
-      expect(reimported.environments[0].variables[0].name).toBe(
-        collection.environments[0].variables[0].name
-      );
-      expect(reimported.environments[0].variables[0].value).toBe(
-        collection.environments[0].variables[0].value
-      );
+      expect(reimported.environments[0].variables[0].name).toBe(collection.environments[0].variables[0].name);
+      expect(reimported.environments[0].variables[0].value).toBe(collection.environments[0].variables[0].value);
     });
   });
 });

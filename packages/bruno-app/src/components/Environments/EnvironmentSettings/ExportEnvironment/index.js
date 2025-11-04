@@ -85,8 +85,7 @@ const ExportEnvironment = ({ collection, selectedEnvironment = null, onClose }) 
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 ml-6">
                   {includeSecrets
                     ? '⚠️ Secret values will be included in plain text'
-                    : 'Secret values will be cleared for security'
-                  }
+                    : 'Secret values will be cleared for security'}
                 </p>
               </div>
             </div>

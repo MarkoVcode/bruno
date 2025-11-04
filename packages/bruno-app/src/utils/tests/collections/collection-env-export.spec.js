@@ -166,7 +166,7 @@ describe('Collection Environment Export Tests', () => {
       expect(blob.type).toBe('application/json');
 
       // Verify blob content
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
 
         // Collection UID should be removed
@@ -208,7 +208,7 @@ describe('Collection Environment Export Tests', () => {
       expect(FileSaver.saveAs).toHaveBeenCalledTimes(1);
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.environments[0].name).toBe('Dev/Test (Local) [2024]');
       });
@@ -243,7 +243,7 @@ describe('Collection Environment Export Tests', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.environments).toHaveLength(3);
         expect(exported.environments[0].name).toBe('Development');
@@ -265,7 +265,7 @@ describe('Collection Environment Export Tests', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.environments).toEqual([]);
       });
@@ -293,7 +293,7 @@ describe('Collection Environment Export Tests', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.environments[0].variables[0].enabled).toBe(true);
         expect(exported.environments[0].variables[1].enabled).toBe(false);
@@ -322,7 +322,7 @@ describe('Collection Environment Export Tests', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.environments[0].variables[0].value).toBe('Hello 世界 🌍');
         expect(exported.environments[0].variables[1].value).toBe('🚀🎉💯');
@@ -343,7 +343,7 @@ describe('Collection Environment Export Tests', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.processEnvVariables).toBeUndefined();
       });

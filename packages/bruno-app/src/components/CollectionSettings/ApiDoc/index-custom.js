@@ -111,8 +111,8 @@ const ApiDocCustom = ({ collection }) => {
           }
 
           // Check if paths match when ignoring case (for case-insensitive APIs)
-          if (normalizedItemPath.toLowerCase() === normalizedTargetPath.toLowerCase() &&
-              itemMethod === targetMethod) {
+          if (normalizedItemPath.toLowerCase() === normalizedTargetPath.toLowerCase()
+            && itemMethod === targetMethod) {
             return item;
           }
 

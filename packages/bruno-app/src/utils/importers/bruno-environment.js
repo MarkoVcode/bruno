@@ -16,13 +16,13 @@ import { uuid } from 'utils/common';
  */
 const validateVariable = (variable) => {
   return (
-    variable &&
-    typeof variable === 'object' &&
-    (typeof variable.name === 'string' || variable.name === undefined) &&
-    (typeof variable.value === 'string' || variable.value === undefined || variable.value === null) &&
-    (typeof variable.enabled === 'boolean' || variable.enabled === undefined) &&
-    (typeof variable.secret === 'boolean' || variable.secret === undefined) &&
-    (typeof variable.type === 'string' || variable.type === undefined)
+    variable
+    && typeof variable === 'object'
+    && (typeof variable.name === 'string' || variable.name === undefined)
+    && (typeof variable.value === 'string' || variable.value === undefined || variable.value === null)
+    && (typeof variable.enabled === 'boolean' || variable.enabled === undefined)
+    && (typeof variable.secret === 'boolean' || variable.secret === undefined)
+    && (typeof variable.type === 'string' || variable.type === undefined)
   );
 };
 
@@ -181,14 +181,11 @@ const importBrunoEnvironment = () => {
   return new Promise((resolve, reject) => {
     fileDialog({ multiple: true, accept: 'application/json' })
       .then((files) => {
-        return Promise.all(
-          Object.values(files ?? {}).map((file) =>
-            readFile(file).catch((err) => {
-              console.error(`Error processing file: ${file.name || 'undefined'}`, err);
-              throw err;
-            })
-          )
-        );
+        return Promise.all(Object.values(files ?? {}).map((file) =>
+          readFile(file).catch((err) => {
+            console.error(`Error processing file: ${file.name || 'undefined'}`, err);
+            throw err;
+          })));
       })
       .then((results) => {
         // Flatten the array of arrays

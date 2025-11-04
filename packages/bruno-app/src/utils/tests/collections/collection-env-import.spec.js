@@ -469,9 +469,9 @@ describe('Collection Environment Import Tests', () => {
     test('should preserve existing UIDs if present', async () => {
       updateUidsInCollection.mockImplementation((collection) => {
         // Simulate adding UIDs
-        collection.environments.forEach(env => {
+        collection.environments.forEach((env) => {
           env.uid = env.uid || 'generated-uid';
-          env.variables.forEach(v => {
+          env.variables.forEach((v) => {
             v.uid = v.uid || 'generated-var-uid';
           });
         });
