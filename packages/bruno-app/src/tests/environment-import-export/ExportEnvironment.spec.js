@@ -62,8 +62,7 @@ describe('ExportEnvironment Component', () => {
           collection={mockCollection}
           selectedEnvironment={mockSelectedEnvironment}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       expect(screen.getByTestId('export-environment-modal')).toBeInTheDocument();
       expect(screen.getByTestId('modal-title')).toHaveTextContent('Export Environment');
@@ -75,8 +74,7 @@ describe('ExportEnvironment Component', () => {
           collection={mockCollection}
           selectedEnvironment={mockSelectedEnvironment}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       const checkbox = screen.getByLabelText('Include secret values');
       expect(checkbox).toBeInTheDocument();
@@ -89,8 +87,7 @@ describe('ExportEnvironment Component', () => {
           collection={mockCollection}
           selectedEnvironment={mockSelectedEnvironment}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       const exportButton = screen.getByTestId('export-selected-environment');
       expect(exportButton).toBeInTheDocument();
@@ -104,8 +101,7 @@ describe('ExportEnvironment Component', () => {
           collection={mockCollection}
           selectedEnvironment={mockSelectedEnvironment}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       const exportAllButton = screen.getByTestId('export-all-environments');
       expect(exportAllButton).toBeInTheDocument();
@@ -124,8 +120,7 @@ describe('ExportEnvironment Component', () => {
           collection={singleEnvCollection}
           selectedEnvironment={mockSelectedEnvironment}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       expect(screen.queryByTestId('export-all-environments')).not.toBeInTheDocument();
     });
@@ -136,8 +131,7 @@ describe('ExportEnvironment Component', () => {
           collection={mockCollection}
           selectedEnvironment={null}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       const exportButton = screen.getByTestId('export-selected-environment');
       expect(exportButton).toBeDisabled();
@@ -151,8 +145,7 @@ describe('ExportEnvironment Component', () => {
           collection={mockCollection}
           selectedEnvironment={mockSelectedEnvironment}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       const checkbox = screen.getByLabelText('Include secret values');
 
@@ -179,8 +172,7 @@ describe('ExportEnvironment Component', () => {
           collection={mockCollection}
           selectedEnvironment={mockSelectedEnvironment}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       const exportButton = screen.getByTestId('export-selected-environment');
 
@@ -189,10 +181,8 @@ describe('ExportEnvironment Component', () => {
       });
 
       expect(brunoEnvironmentExporter.exportEnvironment).toHaveBeenCalledTimes(1);
-      expect(brunoEnvironmentExporter.exportEnvironment).toHaveBeenCalledWith(
-        mockSelectedEnvironment,
-        { includeSecrets: false }
-      );
+      expect(brunoEnvironmentExporter.exportEnvironment).toHaveBeenCalledWith(mockSelectedEnvironment,
+        { includeSecrets: false });
       expect(toast.success).toHaveBeenCalledWith('Environment "Development" exported successfully');
       expect(mockOnClose).toHaveBeenCalled();
     });
@@ -215,10 +205,8 @@ describe('ExportEnvironment Component', () => {
         fireEvent.click(exportButton);
       });
 
-      expect(brunoEnvironmentExporter.exportEnvironment).toHaveBeenCalledWith(
-        mockSelectedEnvironment,
-        { includeSecrets: true }
-      );
+      expect(brunoEnvironmentExporter.exportEnvironment).toHaveBeenCalledWith(mockSelectedEnvironment,
+        { includeSecrets: true });
     });
 
     test('should show error when no environment is selected', async () => {
@@ -253,8 +241,7 @@ describe('ExportEnvironment Component', () => {
           collection={mockCollection}
           selectedEnvironment={mockSelectedEnvironment}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       const exportButton = screen.getByTestId('export-selected-environment');
 
@@ -277,8 +264,7 @@ describe('ExportEnvironment Component', () => {
           collection={mockCollection}
           selectedEnvironment={mockSelectedEnvironment}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       const exportAllButton = screen.getByTestId('export-all-environments');
 
@@ -287,11 +273,9 @@ describe('ExportEnvironment Component', () => {
       });
 
       expect(brunoEnvironmentExporter.exportEnvironments).toHaveBeenCalledTimes(1);
-      expect(brunoEnvironmentExporter.exportEnvironments).toHaveBeenCalledWith(
-        mockCollection.environments,
+      expect(brunoEnvironmentExporter.exportEnvironments).toHaveBeenCalledWith(mockCollection.environments,
         mockCollection.name,
-        { includeSecrets: false }
-      );
+        { includeSecrets: false });
       expect(toast.success).toHaveBeenCalledWith('All 2 environment(s) exported successfully');
       expect(mockOnClose).toHaveBeenCalled();
     });
@@ -314,11 +298,9 @@ describe('ExportEnvironment Component', () => {
         fireEvent.click(exportAllButton);
       });
 
-      expect(brunoEnvironmentExporter.exportEnvironments).toHaveBeenCalledWith(
-        mockCollection.environments,
+      expect(brunoEnvironmentExporter.exportEnvironments).toHaveBeenCalledWith(mockCollection.environments,
         mockCollection.name,
-        { includeSecrets: true }
-      );
+        { includeSecrets: true });
     });
 
     test('should show error when no environments exist', async () => {
@@ -367,8 +349,7 @@ describe('ExportEnvironment Component', () => {
           collection={mockCollection}
           selectedEnvironment={mockSelectedEnvironment}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       const exportAllButton = screen.getByTestId('export-all-environments');
 
@@ -391,8 +372,7 @@ describe('ExportEnvironment Component', () => {
           collection={mockCollection}
           selectedEnvironment={mockSelectedEnvironment}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       const checkbox = screen.getByLabelText('Include secret values');
       const exportButton = screen.getByTestId('export-selected-environment');
@@ -406,10 +386,8 @@ describe('ExportEnvironment Component', () => {
         fireEvent.click(exportButton);
       });
 
-      expect(brunoEnvironmentExporter.exportEnvironment).toHaveBeenCalledWith(
-        mockSelectedEnvironment,
-        { includeSecrets: true }
-      );
+      expect(brunoEnvironmentExporter.exportEnvironment).toHaveBeenCalledWith(mockSelectedEnvironment,
+        { includeSecrets: true });
     });
 
     test('should display correct environment count', () => {
@@ -426,8 +404,7 @@ describe('ExportEnvironment Component', () => {
           collection={threeEnvCollection}
           selectedEnvironment={mockSelectedEnvironment}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       expect(screen.getByText('3 environment(s)')).toBeInTheDocument();
     });
@@ -440,8 +417,7 @@ describe('ExportEnvironment Component', () => {
           collection={mockCollection}
           selectedEnvironment={prodEnv}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       expect(screen.getByText('Production')).toBeInTheDocument();
     });
@@ -460,8 +436,7 @@ describe('ExportEnvironment Component', () => {
           collection={mockCollection}
           selectedEnvironment={specialEnv}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       const exportButton = screen.getByTestId('export-selected-environment');
 
@@ -469,10 +444,8 @@ describe('ExportEnvironment Component', () => {
         fireEvent.click(exportButton);
       });
 
-      expect(brunoEnvironmentExporter.exportEnvironment).toHaveBeenCalledWith(
-        specialEnv,
-        { includeSecrets: false }
-      );
+      expect(brunoEnvironmentExporter.exportEnvironment).toHaveBeenCalledWith(specialEnv,
+        { includeSecrets: false });
       expect(toast.success).toHaveBeenCalledWith('Environment "Dev/Test (Local) [2024]" exported successfully');
     });
 
@@ -537,8 +510,7 @@ describe('ExportEnvironment Component', () => {
           collection={mockCollection}
           selectedEnvironment={mockSelectedEnvironment}
           onClose={mockOnClose}
-        />
-      );
+        />);
 
       const checkbox = screen.getByLabelText('Include secret values');
       expect(checkbox).toHaveAttribute('id', 'include-secrets');

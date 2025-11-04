@@ -434,11 +434,9 @@ describe('ImportEnvironment Component', () => {
       });
 
       await waitFor(() => {
-        expect(importEnvironment).toHaveBeenCalledWith(
-          'Development',
+        expect(importEnvironment).toHaveBeenCalledWith('Development',
           mockPostmanEnvironment.variables,
-          'collection-1'
-        );
+          'collection-1');
       });
     });
 
@@ -529,11 +527,9 @@ describe('ImportEnvironment Component', () => {
       });
 
       await waitFor(() => {
-        expect(importEnvironment).toHaveBeenCalledWith(
-          'Dev/Test (Local) [2024]',
+        expect(importEnvironment).toHaveBeenCalledWith('Dev/Test (Local) [2024]',
           [],
-          'collection-1'
-        );
+          'collection-1');
       });
     });
 
@@ -565,11 +561,9 @@ describe('ImportEnvironment Component', () => {
       });
 
       await waitFor(() => {
-        expect(importEnvironment).toHaveBeenCalledWith(
-          'Development 世界 🌍',
+        expect(importEnvironment).toHaveBeenCalledWith('Development 世界 🌍',
           unicodeEnv.variables,
-          'collection-1'
-        );
+          'collection-1');
       });
     });
 
@@ -604,14 +598,12 @@ describe('ImportEnvironment Component', () => {
       });
 
       await waitFor(() => {
-        expect(importEnvironment).toHaveBeenCalledWith(
-          'Large Environment',
+        expect(importEnvironment).toHaveBeenCalledWith('Large Environment',
           expect.arrayContaining([
             expect.objectContaining({ key: 'VAR_0' }),
             expect.objectContaining({ key: 'VAR_999' })
           ]),
-          'collection-1'
-        );
+          'collection-1');
       });
     });
   });

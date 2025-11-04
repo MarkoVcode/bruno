@@ -120,7 +120,7 @@ describe('Bruno Environment Exporter', () => {
       expect(blob.type).toBe('application/json');
 
       // Verify blob content
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
 
         // Verify structure
@@ -159,7 +159,7 @@ describe('Bruno Environment Exporter', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.variables[0].value).toBe('secret-value');
       });
@@ -177,7 +177,7 @@ describe('Bruno Environment Exporter', () => {
       const [[blob, filename]] = FileSaver.saveAs.mock.calls;
       expect(filename).toBe('Dev/Test (Local) [2024] #1.json');
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.name).toBe('Dev/Test (Local) [2024] #1');
       });
@@ -197,7 +197,7 @@ describe('Bruno Environment Exporter', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.variables[0].value).toBe('Hello 世界 🌍');
         expect(exported.variables[1].value).toBe('🚀🎉💯');
@@ -215,7 +215,7 @@ describe('Bruno Environment Exporter', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.variables).toEqual([]);
       });
@@ -235,7 +235,7 @@ describe('Bruno Environment Exporter', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.variables[0].enabled).toBe(true);
         expect(exported.variables[1].enabled).toBe(false);
@@ -269,7 +269,7 @@ describe('Bruno Environment Exporter', () => {
       // Verify blob type
       expect(blob.type).toBe('application/json');
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
 
         // Verify structure
@@ -308,7 +308,7 @@ describe('Bruno Environment Exporter', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.environments[0].variables[0].value).toBe('secret1');
         expect(exported.environments[1].variables[0].value).toBe('secret2');
@@ -331,7 +331,7 @@ describe('Bruno Environment Exporter', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.environments[0].variables[0].value).toBe('public');
         expect(exported.environments[0].variables[1].value).toBe('');
@@ -345,7 +345,7 @@ describe('Bruno Environment Exporter', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.environments).toEqual([]);
         expect(exported.collectionName).toBe('Empty Collection');
@@ -379,7 +379,7 @@ describe('Bruno Environment Exporter', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.variables[0].enabled).toBe(true);
         expect(exported.variables[1].enabled).toBe(false);
@@ -401,7 +401,7 @@ describe('Bruno Environment Exporter', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.variables[0].type).toBe('text');
         expect(exported.variables[1].type).toBe('number');
@@ -424,7 +424,7 @@ describe('Bruno Environment Exporter', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.variables).toHaveLength(3);
         // JSON stringify converts undefined to null
@@ -507,7 +507,7 @@ describe('Bruno Environment Exporter', () => {
 
       const [[blob]] = FileSaver.saveAs.mock.calls;
 
-      return blob.text().then(text => {
+      return blob.text().then((text) => {
         const exported = JSON.parse(text);
         expect(exported.variables).toHaveLength(1000);
         expect(exported.variables[0].uid).toBeUndefined();

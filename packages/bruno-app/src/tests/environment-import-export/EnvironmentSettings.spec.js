@@ -68,9 +68,8 @@ describe('EnvironmentSettings Component', () => {
 
       render(
         <SharedButton onClick={mockOnClick}>
-          Click Me
-        </SharedButton>
-      );
+  Click Me
+        </SharedButton>);
 
       fireEvent.click(screen.getByText('Click Me'));
       expect(mockOnClick).toHaveBeenCalledTimes(1);
@@ -79,9 +78,8 @@ describe('EnvironmentSettings Component', () => {
     test('should apply custom className', () => {
       render(
         <SharedButton className="custom-class" onClick={() => {}}>
-          Button
-        </SharedButton>
-      );
+  Button
+        </SharedButton>);
 
       const button = screen.getByText('Button');
       expect(button).toHaveClass('custom-class');
@@ -90,9 +88,8 @@ describe('EnvironmentSettings Component', () => {
     test('should have default styling classes', () => {
       render(
         <SharedButton onClick={() => {}}>
-          Button
-        </SharedButton>
-      );
+  Button
+        </SharedButton>);
 
       const button = screen.getByText('Button');
       expect(button).toHaveClass('rounded', 'bg-transparent', 'px-2.5', 'py-2');
@@ -110,8 +107,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       expect(screen.getByText('No environments found')).toBeInTheDocument();
       expect(screen.getByText(/Get started by using the following buttons/)).toBeInTheDocument();
@@ -127,8 +123,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       expect(screen.getByText('Create Environment')).toBeInTheDocument();
       expect(screen.getByText('Import Environment')).toBeInTheDocument();
@@ -145,8 +140,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       const modal = screen.getByTestId('environment-settings-modal');
       expect(modal).toHaveAttribute('data-size', 'md');
@@ -162,8 +156,7 @@ describe('EnvironmentSettings Component', () => {
       const { container } = render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       // IconFileAlert should be rendered
       const icon = container.querySelector('svg');
@@ -182,8 +175,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       fireEvent.click(screen.getByText('Create Environment'));
 
@@ -201,8 +193,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       fireEvent.click(screen.getByText('Import Environment'));
 
@@ -220,8 +211,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       // Open create modal
       fireEvent.click(screen.getByText('Create Environment'));
@@ -244,8 +234,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       // Open import modal
       fireEvent.click(screen.getByText('Import Environment'));
@@ -276,8 +265,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       expect(screen.getByTestId('environment-list')).toBeInTheDocument();
       expect(screen.queryByText('No environments found')).not.toBeInTheDocument();
@@ -295,8 +283,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       const modal = screen.getByTestId('environment-settings-modal');
       expect(modal).toHaveAttribute('data-size', 'lg');
@@ -314,8 +301,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       expect(screen.getByText('Environment List for Test Collection')).toBeInTheDocument();
     });
@@ -334,8 +320,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       expect(screen.getByTestId('environment-list')).toBeInTheDocument();
       expect(collection.environments).toHaveLength(3);
@@ -406,8 +391,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       expect(screen.getByText('No environments found')).toBeInTheDocument();
     });
@@ -441,8 +425,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       expect(screen.getByText('No environments found')).toBeInTheDocument();
     });
@@ -459,8 +442,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       expect(screen.getByTestId('environment-list')).toBeInTheDocument();
     });
@@ -497,8 +479,7 @@ describe('EnvironmentSettings Component', () => {
       const { container } = render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       // Component should render without errors
       expect(screen.getByTestId('environment-list')).toBeInTheDocument();
@@ -514,8 +495,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       expect(screen.getByText('No environments found')).toBeInTheDocument();
     });
@@ -530,8 +510,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       // Default tab
       expect(screen.getByText('No environments found')).toBeInTheDocument();
@@ -577,8 +556,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       const createButton = screen.getByText('Create Environment').closest('button');
       const importButton = screen.getByText('Import Environment').closest('button');
@@ -597,8 +575,7 @@ describe('EnvironmentSettings Component', () => {
       render(
         <Provider store={store}>
           <EnvironmentSettings collection={collection} onClose={mockOnClose} />
-        </Provider>
-      );
+        </Provider>);
 
       expect(screen.getByTestId('environment-settings-modal')).toBeInTheDocument();
       expect(screen.getByTestId('modal-title')).toBeInTheDocument();

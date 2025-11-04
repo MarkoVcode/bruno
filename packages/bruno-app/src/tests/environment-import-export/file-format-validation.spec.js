@@ -20,11 +20,9 @@ describe('Environment File Format Validation', () => {
 
   describe('Postman Environment Import - File Selection', () => {
     test('should accept JSON files through file dialog', async () => {
-      const mockFile = new File(
-        [JSON.stringify({ name: 'Development', values: [] })],
+      const mockFile = new File([JSON.stringify({ name: 'Development', values: [] })],
         'environment.json',
-        { type: 'application/json' }
-      );
+        { type: 'application/json' });
 
       fileDialog.mockResolvedValue([mockFile]);
       postmanToBrunoEnvironment.mockReturnValue({
@@ -164,7 +162,7 @@ describe('Environment File Format Validation', () => {
 
       postmanToBrunoEnvironment.mockReturnValue({
         name: 'Large Environment',
-        variables: largeEnv.values.map(v => ({ name: v.key, value: v.value, enabled: v.enabled }))
+        variables: largeEnv.values.map((v) => ({ name: v.key, value: v.value, enabled: v.enabled }))
       });
 
       const result = await importPostmanEnvironment();
@@ -288,7 +286,7 @@ describe('Environment File Format Validation', () => {
       // Mock FileReader to simulate error
       const originalFileReader = global.FileReader;
       global.FileReader = jest.fn().mockImplementation(() => ({
-        readAsText: jest.fn(function() {
+        readAsText: jest.fn(function () {
           if (this.onerror) {
             this.onerror(new Error('File read error'));
           }
@@ -339,7 +337,7 @@ describe('Environment File Format Validation', () => {
       const result = await importPostmanEnvironment();
 
       expect(result).toHaveLength(3);
-      expect(result.map(e => e.name)).toEqual(['Dev', 'Prod', 'Staging']);
+      expect(result.map((e) => e.name)).toEqual(['Dev', 'Prod', 'Staging']);
     });
 
     test('should handle mixed valid and invalid files', async () => {
