@@ -28,6 +28,8 @@ import { scrollToTheActiveTab } from 'utils/tabs';
 import ShareCollection from 'components/ShareCollection/index';
 import { CollectionItemDragPreview } from './CollectionItem/CollectionItemDragPreview/index';
 import { sortByNameThenSequence } from 'utils/common/index';
+import ImportEnvironmentFromCollection from './ImportEnvironmentFromCollection';
+import ExportEnvironment from 'components/Environments/EnvironmentSettings/ExportEnvironment';
 
 const Collection = ({ collection, searchText, isIndented = false, isMaster = false, isSubscriber = false }) => {
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
@@ -36,6 +38,8 @@ const Collection = ({ collection, searchText, isIndented = false, isMaster = fal
   const [showCloneCollectionModalOpen, setShowCloneCollectionModalOpen] = useState(false);
   const [showShareCollectionModal, setShowShareCollectionModal] = useState(false);
   const [showRemoveCollectionModal, setShowRemoveCollectionModal] = useState(false);
+  const [showImportEnvironmentModal, setShowImportEnvironmentModal] = useState(false);
+  const [showExportEnvironmentModal, setShowExportEnvironmentModal] = useState(false);
   const [dropType, setDropType] = useState(null);
   const dispatch = useDispatch();
   const isLoading = areItemsLoading(collection);
@@ -246,6 +250,12 @@ const Collection = ({ collection, searchText, isIndented = false, isMaster = fal
       {showCloneCollectionModalOpen && (
         <CloneCollection collectionUid={collection.uid} onClose={() => setShowCloneCollectionModalOpen(false)} />
       )}
+      {showImportEnvironmentModal && (
+        <ImportEnvironmentFromCollection collection={collection} onClose={() => setShowImportEnvironmentModal(false)} />
+      )}
+      {showExportEnvironmentModal && (
+        <ExportEnvironment collection={collection} onClose={() => setShowExportEnvironmentModal(false)} />
+      )}
       <CollectionItemDragPreview />
       <div className={collectionRowClassName}
         ref={(node) => {
@@ -368,7 +378,7 @@ const Collection = ({ collection, searchText, isIndented = false, isMaster = fal
                 setShowShareCollectionModal(true);
               }}
             >
-              Export
+              Share
             </div>
             <div
               className="dropdown-item"
@@ -387,6 +397,26 @@ const Collection = ({ collection, searchText, isIndented = false, isMaster = fal
               }}
             >
               Detach
+            </div>
+            <div className="dropdown-separator" />
+            <div className="dropdown-header">Environment</div>
+            <div
+              className="dropdown-item"
+              onClick={(_e) => {
+                menuDropdownTippyRef.current.hide();
+                setShowImportEnvironmentModal(true);
+              }}
+            >
+              Import
+            </div>
+            <div
+              className="dropdown-item"
+              onClick={(_e) => {
+                menuDropdownTippyRef.current.hide();
+                setShowExportEnvironmentModal(true);
+              }}
+            >
+              Export
             </div>
           </Dropdown>
         </div>

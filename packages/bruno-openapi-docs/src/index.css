@@ -8,6 +8,225 @@
   line-height: 1.6;
 }
 
+/* Markdown content styling */
+.markdown-content {
+  line-height: 1.6;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.markdown-content p {
+  margin: 0.8em 0;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  margin: 1.2em 0 0.6em 0;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.markdown-content h1 { font-size: 1.8em; }
+.markdown-content h2 { font-size: 1.5em; }
+.markdown-content h3 { font-size: 1.3em; }
+.markdown-content h4 { font-size: 1.1em; }
+.markdown-content h5 { font-size: 1em; }
+.markdown-content h6 { font-size: 0.9em; }
+
+.markdown-content ul,
+.markdown-content ol {
+  margin: 0.8em 0;
+  padding-left: 2em;
+}
+
+.markdown-content li {
+  margin: 0.3em 0;
+}
+
+.markdown-content code {
+  background: var(--code-bg, rgba(0, 0, 0, 0.05));
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  font-size: 0.9em;
+  color: var(--code-color, #d63384);
+}
+
+.markdown-content pre {
+  background: var(--code-bg, rgba(0, 0, 0, 0.05));
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.markdown-content pre code {
+  background: none;
+  padding: 0;
+  color: var(--text-primary, #1a1a1a);
+  display: block;
+  overflow-x: auto;
+}
+
+/* JSON highlighting in markdown code blocks */
+.markdown-content pre code .json-key {
+  color: var(--json-key-color, #0550ae);
+  font-weight: 500;
+}
+
+.markdown-content pre code .json-string {
+  color: var(--json-string-color, #0a3069);
+}
+
+.markdown-content pre code .json-number {
+  color: var(--json-number-color, #cf222e);
+}
+
+.markdown-content pre code .json-boolean {
+  color: var(--json-boolean-color, #8250df);
+  font-weight: 600;
+}
+
+.markdown-content pre code .json-null {
+  color: var(--json-null-color, #57606a);
+  font-style: italic;
+}
+
+.markdown-content blockquote {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  border-left: 4px solid var(--border-color, #e0e0e0);
+  background: var(--blockquote-bg, rgba(0, 0, 0, 0.02));
+  color: var(--text-muted, #666);
+}
+
+.markdown-content a {
+  color: var(--link-color, #1663bb);
+  text-decoration: none;
+}
+
+.markdown-content a:hover {
+  text-decoration: underline;
+}
+
+.markdown-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid var(--border-color, #e0e0e0);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.markdown-content th {
+  background: var(--table-header-bg, rgba(0, 0, 0, 0.05));
+  font-weight: 600;
+}
+
+.markdown-content hr {
+  margin: 1.5em 0;
+  border: none;
+  border-top: 1px solid var(--border-color, #e0e0e0);
+}
+
+.markdown-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+.markdown-content strong {
+  font-weight: 600;
+}
+
+.markdown-content em {
+  font-style: italic;
+}
+
+/* JSON Viewer Syntax Highlighting */
+.json-viewer {
+  background: var(--code-block-bg, #f8f9fa);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.json-viewer code {
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* JSON Syntax Colors - Light Theme */
+.json-key {
+  color: var(--json-key-color, #0550ae);
+  font-weight: 500;
+}
+
+.json-string {
+  color: var(--json-string-color, #0a3069);
+}
+
+.json-number {
+  color: var(--json-number-color, #cf222e);
+}
+
+.json-boolean {
+  color: var(--json-boolean-color, #8250df);
+  font-weight: 600;
+}
+
+.json-null {
+  color: var(--json-null-color, #57606a);
+  font-style: italic;
+}
+
+/* Example Section */
+.example-section {
+  margin-top: 16px;
+}
+
+.example-section h4 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted, #666);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.content-type {
+  margin: 12px 0;
+}
+
+.content-type-header {
+  margin-bottom: 8px;
+}
+
+.content-type-header code {
+  background: var(--code-bg, rgba(0, 0, 0, 0.05));
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary, #1a1a1a);
+}
+
 .openapi-sidebar {
   width: 280px;
   min-width: 280px;

@@ -31,6 +31,26 @@ const Wrapper = styled.div`
         background-color: ${(props) => props.theme.dropdown.labelBg};
       }
 
+      .dropdown-separator {
+        height: 1px;
+        background-color: ${(props) => props.theme.dropdown.separator};
+        margin: 0.25rem 0;
+      }
+
+      .dropdown-header {
+        display: flex;
+        align-items: center;
+        padding: 0.35rem 0.6rem;
+        padding-left: calc(0.6rem + 3px);
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: ${(props) => props.theme.dropdown.color};
+        background-color: ${(props) => props.theme.dropdown.labelBg};
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+      }
+
       .dropdown-item {
         display: flex;
         align-items: center;

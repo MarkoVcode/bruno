@@ -62,27 +62,67 @@ const ApiDocCustom = ({ collection }) => {
         type: item.type
       }));
       dispatch(focusTab({ uid: item.uid }));
+    } else {
+      // Show a toast message if no matching request is found
+      const toast = require('react-hot-toast');
+      toast.default.error(`No matching request found for ${method.toUpperCase()} ${path}`);
     }
   };
 
+  // Helper function to normalize path for comparison
+  const normalizePath = (url) => {
+    if (!url) return '';
+
+    // Remove query string and hash
+    let path = url.split('?')[0].split('#')[0];
+
+    // Remove protocol and domain (http://example.com/path -> /path)
+    path = path.replace(/^https?:\/\/[^/]+/, '');
+
+    // Remove base URL if present (e.g., {{baseUrl}}/path -> /path)
+    path = path.replace(/^\{\{[^}]+\}\}/, '');
+
+    // Ensure path starts with /
+    if (path && !path.startsWith('/')) {
+      path = '/' + path;
+    }
+
+    // Remove trailing slash
+    path = path.replace(/\/$/, '');
+
+    return path;
+  };
+
   // Helper function to find matching Bruno request
-  const findMatchingRequest = (collection, path, method) => {
+  const findMatchingRequest = (collection, targetPath, targetMethod) => {
+    const normalizedTargetPath = normalizePath(targetPath);
+
     const searchItems = (items) => {
       for (const item of items) {
         if (item.type === 'http-request' || item.type === 'graphql-request') {
-          // Check if path and method match
           const itemPath = item.draft?.request?.url || item.request?.url || '';
           const itemMethod = item.draft?.request?.method || item.request?.method || '';
 
-          // Extract path from full URL
-          const urlPath = itemPath.split('?')[0].split('#')[0];
-          const pathWithoutProtocol = urlPath.replace(/^https?:\/\/[^/]+/, '');
+          const normalizedItemPath = normalizePath(itemPath);
 
-          if (pathWithoutProtocol === path && itemMethod === method) {
+          // Check for exact match
+          if (normalizedItemPath === normalizedTargetPath && itemMethod === targetMethod) {
+            return item;
+          }
+
+          // Check if paths match when ignoring case (for case-insensitive APIs)
+          if (normalizedItemPath.toLowerCase() === normalizedTargetPath.toLowerCase() &&
+              itemMethod === targetMethod) {
+            return item;
+          }
+
+          // Check if the item path ends with the target path (handles base URL variations)
+          if (normalizedItemPath.endsWith(normalizedTargetPath) && itemMethod === targetMethod) {
             return item;
           }
         }
 
+        // Recursively search in folders
         if (item.items && item.items.length > 0) {
           const found = searchItems(item.items);
           if (found) return found;

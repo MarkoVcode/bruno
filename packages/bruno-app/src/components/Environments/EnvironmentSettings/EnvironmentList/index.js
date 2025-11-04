@@ -3,8 +3,9 @@ import { findEnvironmentInCollection } from 'utils/collections';
 import usePrevious from 'hooks/usePrevious';
 import EnvironmentDetails from './EnvironmentDetails';
 import CreateEnvironment from '../CreateEnvironment';
-import { IconDownload, IconShieldLock } from '@tabler/icons';
+import { IconDownload, IconUpload, IconShieldLock } from '@tabler/icons';
 import ImportEnvironment from '../ImportEnvironment';
+import ExportEnvironment from '../ExportEnvironment';
 import ManageSecrets from '../ManageSecrets';
 import StyledWrapper from './StyledWrapper';
 import ConfirmSwitchEnv from './ConfirmSwitchEnv';
@@ -15,6 +16,7 @@ const EnvironmentList = ({ selectedEnvironment, setSelectedEnvironment, collecti
   const { environments } = collection;
   const [openCreateModal, setOpenCreateModal] = useState(false);
   const [openImportModal, setOpenImportModal] = useState(false);
+  const [openExportModal, setOpenExportModal] = useState(false);
   const [openManageSecretsModal, setOpenManageSecretsModal] = useState(false);
 
   const [switchEnvConfirmClose, setSwitchEnvConfirmClose] = useState(false);
@@ -83,6 +85,14 @@ const EnvironmentList = ({ selectedEnvironment, setSelectedEnvironment, collecti
     }
   };
 
+  const handleExportClick = () => {
+    if (!isModified) {
+      setOpenExportModal(true);
+    } else {
+      setSwitchEnvConfirmClose(true);
+    }
+  };
+
   const handleSecretsClick = () => {
     setOpenManageSecretsModal(true);
   };
@@ -97,6 +107,7 @@ const EnvironmentList = ({ selectedEnvironment, setSelectedEnvironment, collecti
     <StyledWrapper>
       {openCreateModal && <CreateEnvironment collection={collection} onClose={() => setOpenCreateModal(false)} />}
       {openImportModal && <ImportEnvironment collection={collection} onClose={() => setOpenImportModal(false)} />}
+      {openExportModal && <ExportEnvironment collection={collection} selectedEnvironment={selectedEnvironment} onClose={() => setOpenExportModal(false)} />}
       {openManageSecretsModal && <ManageSecrets onClose={() => setOpenManageSecretsModal(false)} />}
 
       <div className="flex">
@@ -128,6 +139,10 @@ const EnvironmentList = ({ selectedEnvironment, setSelectedEnvironment, collecti
               <div className="flex items-center" onClick={() => handleImportClick()}>
                 <IconDownload size={12} strokeWidth={2} />
                 <span className="label ml-1 text-xs">Import</span>
+              </div>
+              <div className="flex items-center mt-2" onClick={() => handleExportClick()}>
+                <IconUpload size={12} strokeWidth={2} />
+                <span className="label ml-1 text-xs">Export</span>
               </div>
               <div className="flex items-center mt-2" onClick={() => handleSecretsClick()}>
                 <IconShieldLock size={12} strokeWidth={2} />

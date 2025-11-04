@@ -150,7 +150,12 @@ export function isSimpleType(schema: SchemaObject): boolean {
 /**
  * Get example value for a schema
  */
-export function getSchemaExample(schema: SchemaObject): any {
+export function getSchemaExample(schema: SchemaObject, depth: number = 0): any {
+  // Prevent infinite recursion
+  if (depth > 5) {
+    return null;
+  }
+
   if (schema.example !== undefined) {
     return schema.example;
   }
@@ -170,15 +175,31 @@ export function getSchemaExample(schema: SchemaObject): any {
              schema.format === 'date-time' ? '2024-01-01T00:00:00Z' :
              schema.format === 'date' ? '2024-01-01' :
              schema.format === 'uuid' ? '123e4567-e89b-12d3-a456-426614174000' :
+             schema.format === 'uri' ? 'https://example.com' :
+             schema.format === 'hostname' ? 'example.com' :
+             schema.format === 'ipv4' ? '192.168.1.1' :
+             schema.format === 'ipv6' ? '2001:0db8:85a3:0000:0000:8a2e:0370:7334' :
              'string';
     case 'number':
+      return schema.format === 'double' ? 123.45 : 42;
     case 'integer':
-      return 0;
+      return 42;
     case 'boolean':
-      return false;
+      return true;
     case 'array':
+      if (schema.items) {
+        const itemExample = getSchemaExample(schema.items, depth + 1);
+        return [itemExample];
+      }
       return [];
     case 'object':
+      if (schema.properties) {
+        const example: any = {};
+        Object.entries(schema.properties).forEach(([key, propSchema]) => {
+          example[key] = getSchemaExample(propSchema, depth + 1);
+        });
+        return example;
+      }
       return {};
     default:
       return null;

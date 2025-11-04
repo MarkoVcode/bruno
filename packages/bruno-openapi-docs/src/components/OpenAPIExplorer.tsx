@@ -8,6 +8,9 @@ import type {
   ResponseObject
 } from '../types';
 import { MethodBadge } from './MethodBadge';
+import { Markdown } from './Markdown';
+import { JsonViewer } from './JsonViewer';
+import { getSchemaExample } from '../utils/parser';
 import '../index.css';
 
 interface OpenAPIExplorerProps {
@@ -179,7 +182,7 @@ export const OpenAPIExplorer: React.FC<OpenAPIExplorerProps> = ({ spec, onOpenRe
           <h1>{spec.info.title}</h1>
           <p className="version">Version: {spec.info.version}</p>
           {spec.info.description && (
-            <div className="description">{spec.info.description}</div>
+            <Markdown content={spec.info.description} className="description" />
           )}
 
           {spec.servers && spec.servers.length > 0 && (
@@ -188,7 +191,7 @@ export const OpenAPIExplorer: React.FC<OpenAPIExplorerProps> = ({ spec, onOpenRe
               {spec.servers.map((server, idx) => (
                 <div key={idx} className="server">
                   <code>{server.url}</code>
-                  {server.description && <p>{server.description}</p>}
+                  {server.description && <Markdown content={server.description} />}
                 </div>
               ))}
             </div>
@@ -211,7 +214,7 @@ export const OpenAPIExplorer: React.FC<OpenAPIExplorerProps> = ({ spec, onOpenRe
         </div>
 
         {operation.summary && <p className="summary">{operation.summary}</p>}
-        {operation.description && <p className="description">{operation.description}</p>}
+        {operation.description && <Markdown content={operation.description} className="description" />}
 
         {operation.deprecated && (
           <div className="deprecated-warning">⚠️ This endpoint is deprecated</div>
@@ -222,7 +225,7 @@ export const OpenAPIExplorer: React.FC<OpenAPIExplorerProps> = ({ spec, onOpenRe
             className="open-in-bruno-btn"
             onClick={() => onOpenRequest(path, method)}
           >
-            Open in Bruno →
+            Try it out
           </button>
         )}
 
@@ -238,7 +241,7 @@ export const OpenAPIExplorer: React.FC<OpenAPIExplorerProps> = ({ spec, onOpenRe
                     <SchemaDisplay schema={param.schema} spec={spec} />
                   </span>
                 )}
-                {param.description && <p className="param-description">{param.description}</p>}
+                {param.description && <Markdown content={param.description} className="param-description" />}
               </div>
             ))}
           </div>
@@ -256,7 +259,7 @@ export const OpenAPIExplorer: React.FC<OpenAPIExplorerProps> = ({ spec, onOpenRe
                     <SchemaDisplay schema={param.schema} spec={spec} />
                   </span>
                 )}
-                {param.description && <p className="param-description">{param.description}</p>}
+                {param.description && <Markdown content={param.description} className="param-description" />}
               </div>
             ))}
           </div>
@@ -267,8 +270,20 @@ export const OpenAPIExplorer: React.FC<OpenAPIExplorerProps> = ({ spec, onOpenRe
             <h3>Request Body</h3>
             {Object.entries(operation.requestBody.content || {}).map(([contentType, media]) => (
               <div key={contentType} className="content-type">
-                <code>{contentType}</code>
-                {media.schema && <SchemaDisplay schema={media.schema} spec={spec} />}
+                <div className="content-type-header">
+                  <code>{contentType}</code>
+                </div>
+                {media.schema && (
+                  <>
+                    <SchemaDisplay schema={media.schema} spec={spec} />
+                    {contentType.includes('json') && (
+                      <div className="example-section">
+                        <h4>Example</h4>
+                        <JsonViewer data={getSchemaExample(media.schema)} />
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -286,9 +301,21 @@ export const OpenAPIExplorer: React.FC<OpenAPIExplorerProps> = ({ spec, onOpenRe
                 <div className="response-content">
                   {Object.entries((response as ResponseObject).content || {}).map(
                     ([contentType, media]) => (
-                      <div key={contentType}>
-                        <code>{contentType}</code>
-                        {media.schema && <SchemaDisplay schema={media.schema} spec={spec} />}
+                      <div key={contentType} className="content-type">
+                        <div className="content-type-header">
+                          <code>{contentType}</code>
+                        </div>
+                        {media.schema && (
+                          <>
+                            <SchemaDisplay schema={media.schema} spec={spec} />
+                            {contentType.includes('json') && (
+                              <div className="example-section">
+                                <h4>Example</h4>
+                                <JsonViewer data={getSchemaExample(media.schema)} />
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
                     )
                   )}
