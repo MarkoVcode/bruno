@@ -51,3 +51,10 @@ bruno.iml
 
 # Playwright
 /blob-report/
+
+# Claude Flow / Swarm / Hive Mind Artifacts (NEVER commit these)
+.swarm/
+.hive-mind/
+.claude-flow/
+coordination/
+memory/
