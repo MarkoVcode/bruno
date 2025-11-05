@@ -9,12 +9,21 @@ export default defineConfig({
   plugins: [
     pluginNodePolyfill(),
     pluginReact(),
-    pluginStyledComponents(),
+    // NOTE: pluginStyledComponents causes SWC Wasm compatibility error with Rspack 1.6.x
+    // Using babel-plugin-styled-components via Babel loader instead
     pluginSass(),
     pluginBabel({
       include: /\.(?:js|jsx|tsx)$/,
       babelLoaderOptions(opts) {
-        opts.plugins?.unshift('babel-plugin-react-compiler');
+        // Add styled-components babel plugin for proper SSR and better debugging
+        opts.plugins = opts.plugins || [];
+        opts.plugins.push(['babel-plugin-styled-components', {
+          displayName: true,
+          fileName: true,
+          ssr: false
+        }]);
+        // NOTE: React compiler disabled for now - can be re-enabled when needed
+        // opts.plugins.unshift('babel-plugin-react-compiler');
       }
     })
   ],
@@ -47,6 +56,10 @@ export default defineConfig({
         // List specific Node.js modules you want to exclude
         // Format: 'module-name': 'commonjs module-name'
         'worker_threads': 'commonjs worker_threads',
+        'node:worker_threads': 'commonjs worker_threads',
+        'node:path': 'commonjs path',
+        'node:os': 'commonjs os',
+        'node:fs': 'commonjs fs',
         // 'path': 'commonjs path'
       }
     },

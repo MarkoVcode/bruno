@@ -39,7 +39,7 @@ if (!isBrunoNRelease) {
 const config = {
   appId: 'com.usebruno.app',
   productName: productName,
-  electronVersion: '37.6.1',
+  electronVersion: '38.5.0',
   buildVersion: version, // Use the git tag version
   directories: {
     buildResources: 'resources',
