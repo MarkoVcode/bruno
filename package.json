@@ -47,7 +47,7 @@
     "ts-jest": "^29.2.6"
   },
   "scripts": {
-    "postinstall": "patch-package && cd packages/bruno-electron && electron-builder install-app-deps",
+    "postinstall": "patch-package && cd packages/bruno-electron && npx electron-builder install-app-deps",
     "setup": "node ./scripts/setup.js",
     "watch:converters": "npm run watch --workspace=packages/bruno-converters",
     "dev": "concurrently --kill-others \"npm run dev:web\" \"npm run dev:electron\"",

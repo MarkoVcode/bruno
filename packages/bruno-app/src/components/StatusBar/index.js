@@ -23,6 +23,7 @@ const StatusBar = () => {
   const isHistoryOpen = useSelector((state) => state.history.isHistoryOpen);
   const [cookiesOpen, setCookiesOpen] = useState(false);
   const { version } = useApp();
+  const brunonReleaseTag = 'v1.0.3';
 
   const errorCount = logs.filter(log => log.type === 'error').length;
 
@@ -166,7 +167,7 @@ const StatusBar = () => {
             <div className="status-bar-divider"></div>
             
             <div className="status-bar-version">
-              v{version}
+              {brunonReleaseTag || `v${version}`}
             </div>
           </div>
         </div>
