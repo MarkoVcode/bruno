@@ -13,7 +13,8 @@ import {
   IconChevronDown,
   IconTerminal2,
   IconNetwork,
-  IconDashboard
+  IconDashboard,
+  IconRoute
 } from '@tabler/icons';
 import { 
   closeConsole, 
@@ -31,6 +32,7 @@ import RequestDetailsPanel from './RequestDetailsPanel';
 // import DebugTab from './DebugTab';
 import ErrorDetailsPanel from './ErrorDetailsPanel';
 import Performance from '../Performance';
+import Trace from '../Trace';
 import StyledWrapper from './StyledWrapper';
 
 const LogIcon = ({ type }) => {
@@ -389,6 +391,8 @@ const Console = () => {
         return <NetworkTab />;
       case 'performance':
         return <Performance />;
+      case 'trace':
+        return <Trace />;
       // case 'debug':
       //   return <DebugTab />;
       default:
@@ -497,7 +501,15 @@ const Console = () => {
             <span>Performance</span>
           </button>
 
-          {/* <button 
+          <button
+            className={`console-tab ${activeTab === 'trace' ? 'active' : ''}`}
+            onClick={() => handleTabChange('trace')}
+          >
+            <IconRoute size={16} strokeWidth={1.5} />
+            <span>Trace</span>
+          </button>
+
+          {/* <button
             className={`console-tab ${activeTab === 'debug' ? 'active' : ''}`}
             onClick={() => handleTabChange('debug')}
           >
