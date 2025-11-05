@@ -20,13 +20,12 @@ const macConfig = {
     {
       target: 'dmg',
       arch: ['x64', 'arm64']
-    },
-    {
-      target: 'zip',
-      arch: ['x64', 'arm64']
     }
+    // ZIP target removed: DMG preserves permissions and is standard macOS format
+    // ZIP artifacts had permission corruption issues with GitHub Actions upload-artifact
   ],
-  icon: 'resources/icons/mac/icon.icns'
+  icon: 'resources/icons/mac/icon.icns',
+  minimumSystemVersion: '10.15.0' // Electron 37 requires macOS 10.15+ (x64) and 11.0+ (arm64)
 };
 
 // Only add code signing configuration for official Bruno builds
