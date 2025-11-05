@@ -2,6 +2,7 @@ import React from 'react';
 import { uuid } from 'utils/common';
 import { IconFiles, IconRun, IconEye, IconSettings } from '@tabler/icons';
 import EnvironmentSelector from 'components/Environments/EnvironmentSelector';
+import HookTopBar from 'components/HookTopBar';
 import { addTab } from 'providers/ReduxStore/slices/tabs';
 import { useDispatch } from 'react-redux';
 import ToolHint from 'components/ToolHint';
@@ -47,6 +48,9 @@ const CollectionToolBar = ({ collection }) => {
         <div className="flex flex-1 items-center cursor-pointer hover:underline" onClick={viewCollectionSettings}>
           <IconFiles size={18} strokeWidth={1.5} />
           <span className="ml-2 mr-4 font-semibold">{collection?.name}</span>
+        </div>
+        <div className="flex flex-1 items-center justify-center">
+          <HookTopBar collection={collection} />
         </div>
         <div className="flex flex-3 items-center justify-end">
           <span className="mr-2">

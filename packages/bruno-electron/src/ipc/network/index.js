@@ -936,6 +936,31 @@ const registerNetworkIpc = (mainWindow) => {
     });
   });
 
+  // handler for hookTopBar feature - makes simple GET request
+  ipcMain.handle('fetch-hook-topbar', async (event, url) => {
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        timeout: 10000, // 10 second timeout
+        validateStatus: (status) => status >= 200 && status < 300
+      });
+
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      console.warn(`hookTopBar fetch failed: ${error.message}`);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  });
+
   // handler for fetch-gql-schema
   ipcMain.handle('fetch-gql-schema', fetchGqlSchemaHandler)
 

@@ -19,6 +19,7 @@ import RemoveCollection from './RemoveCollection';
 import { doesCollectionHaveItemsMatchingSearchText } from 'utils/collections/search';
 import { isItemAFolder, isItemARequest } from 'utils/collections';
 import { isTabForItemActive } from 'src/selectors/tab';
+import ToolHint from 'components/ToolHint';
 
 import RenameCollection from './RenameCollection';
 import StyledWrapper from './StyledWrapper';
@@ -400,24 +401,44 @@ const Collection = ({ collection, searchText, isIndented = false, isMaster = fal
             </div>
             <div className="dropdown-separator" />
             <div className="dropdown-header">Environment</div>
-            <div
-              className="dropdown-item"
-              onClick={(_e) => {
-                menuDropdownTippyRef.current.hide();
-                setShowImportEnvironmentModal(true);
-              }}
+            <ToolHint
+              text="Environment import is disabled for collections using shared environments"
+              toolhintId={`import-env-disabled-${collection.uid}`}
+              place="left"
+              hidden={!isSubscriber}
             >
-              Import
-            </div>
-            <div
-              className="dropdown-item"
-              onClick={(_e) => {
-                menuDropdownTippyRef.current.hide();
-                setShowExportEnvironmentModal(true);
-              }}
+              <button
+                className="dropdown-item w-full"
+                disabled={isSubscriber}
+                onClick={(_e) => {
+                  if (!isSubscriber) {
+                    menuDropdownTippyRef.current.hide();
+                    setShowImportEnvironmentModal(true);
+                  }
+                }}
+              >
+                Import
+              </button>
+            </ToolHint>
+            <ToolHint
+              text="Environment export is disabled for collections using shared environments"
+              toolhintId={`export-env-disabled-${collection.uid}`}
+              place="left"
+              hidden={!isSubscriber}
             >
-              Export
-            </div>
+              <button
+                className="dropdown-item w-full"
+                disabled={isSubscriber}
+                onClick={(_e) => {
+                  if (!isSubscriber) {
+                    menuDropdownTippyRef.current.hide();
+                    setShowExportEnvironmentModal(true);
+                  }
+                }}
+              >
+                Export
+              </button>
+            </ToolHint>
           </Dropdown>
         </div>
       </div>
