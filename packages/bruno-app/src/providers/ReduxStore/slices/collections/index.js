@@ -2627,20 +2627,6 @@ export const collectionsSlice = createSlice({
         }
       }
     },
-    updateRequestTrace: (state, action) => {
-      const collection = findCollectionByUid(state.collections, action.payload.collectionUid);
-
-      if (collection) {
-        const item = findItemInCollection(collection, action.payload.itemUid);
-
-        if (item && isItemARequest(item)) {
-          if (!item.draft) {
-            item.draft = cloneDeep(item);
-          }
-          item.draft.request.trace = action.payload.trace;
-        }
-      }
-    },
     updateFolderDocs: (state, action) => {
       const collection = findCollectionByUid(state.collections, action.payload.collectionUid);
       const folder = collection ? findItemInCollection(collection, action.payload.folderUid) : null;
@@ -3049,7 +3035,6 @@ export const {
   updateRunnerTagsDetails,
   updateRunnerConfiguration,
   updateRequestDocs,
-  updateRequestTrace,
   updateFolderDocs,
   moveCollection,
   collectionAddOauth2CredentialsByUrl,

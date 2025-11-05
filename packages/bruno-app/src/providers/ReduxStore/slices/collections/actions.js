@@ -69,7 +69,6 @@ import { addTab } from 'providers/ReduxStore/slices/tabs';
 import { updateSettingsSelectedTab } from './index';
 import { getSubscriberCollectionUids, copyEnvironmentsFromMaster } from 'utils/environment-sync';
 import { saveEnvironmentSyncConfig } from '../app';
-import { interceptRequest } from 'utils/trace';
 
 export const renameCollection = (newName, collectionUid) => (dispatch, getState) => {
   const state = getState();
@@ -376,11 +375,6 @@ export const sendRequest = (item, collectionUid) => (dispatch, getState) => {
           // Save to electron-store (persistent)
           saveHistoryEntry(historyEntry).catch((err) => {
             console.error('Failed to save history entry:', err);
-          });
-
-          // Trigger trace request if enabled
-          interceptRequest(itemCopy, collectionCopy, itemCopy.request, sendNetworkRequest, dispatch, environment).catch((err) => {
-            console.error('Trace request failed:', err);
           });
 
           return serializedResponse;
