@@ -9,6 +9,7 @@ import globalEnvironmentsReducer from './slices/global-environments';
 import logsReducer from './slices/logs';
 import performanceReducer from './slices/performance';
 import historyReducer from './slices/history';
+import traceReducer from './slices/trace';
 import { draftDetectMiddleware } from './middlewares/draft/middleware';
 
 const isDevEnv = () => {
@@ -29,7 +30,8 @@ export const store = configureStore({
     globalEnvironments: globalEnvironmentsReducer,
     logs: logsReducer,
     performance: performanceReducer,
-    history: historyReducer
+    history: historyReducer,
+    trace: traceReducer
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(middleware)
 });

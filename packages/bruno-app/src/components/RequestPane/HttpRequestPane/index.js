@@ -11,6 +11,7 @@ import Vars from 'components/RequestPane/Vars';
 import Assertions from 'components/RequestPane/Assertions';
 import Script from 'components/RequestPane/Script';
 import Tests from 'components/RequestPane/Tests';
+import Trace from 'components/RequestPane/Trace';
 import StyledWrapper from './StyledWrapper';
 import { find, get } from 'lodash';
 import Documentation from 'components/Documentation/index';
@@ -59,6 +60,9 @@ const HttpRequestPane = ({ item, collection }) => {
       case 'tests': {
         return <Tests item={item} collection={collection} />;
       }
+      case 'trace': {
+        return <Trace item={item} collection={collection} />;
+      }
       case 'docs': {
         return <Documentation item={item} collection={collection} />;
       }
@@ -86,7 +90,7 @@ const HttpRequestPane = ({ item, collection }) => {
     });
   };
 
-  const isMultipleContentTab = ['params', 'script', 'vars', 'auth', 'docs'].includes(focusedTab.requestPaneTab);
+  const isMultipleContentTab = ['params', 'script', 'vars', 'auth', 'docs', 'trace'].includes(focusedTab.requestPaneTab);
 
   // get the length of active params, headers, asserts and vars as well as the contents of the body, tests and script
   const getPropertyFromDraftOrRequest = (propertyKey) =>
@@ -98,6 +102,7 @@ const HttpRequestPane = ({ item, collection }) => {
   const assertions = getPropertyFromDraftOrRequest('request.assertions');
   const tests = getPropertyFromDraftOrRequest('request.tests');
   const docs = getPropertyFromDraftOrRequest('request.docs');
+  const trace = getPropertyFromDraftOrRequest('request.trace');
   const requestVars = getPropertyFromDraftOrRequest('request.vars.req');
   const responseVars = getPropertyFromDraftOrRequest('request.vars.res');
   const auth = getPropertyFromDraftOrRequest('request.auth');
@@ -158,6 +163,10 @@ const HttpRequestPane = ({ item, collection }) => {
               <StatusDot type="error" /> :
               <StatusDot />
           )}
+        </div>
+        <div className={getTabClassname('trace')} role="tab" onClick={() => selectTab('trace')}>
+          Trace
+          {trace && trace.enabled && <StatusDot />}
         </div>
         <div className={getTabClassname('docs')} role="tab" onClick={() => selectTab('docs')}>
           Docs
