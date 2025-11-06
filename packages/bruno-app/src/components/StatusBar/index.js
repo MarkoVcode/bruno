@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { IconSettings, IconCookie, IconTool, IconSearch, IconHistory } from '@tabler/icons';
+import { IconSettings, IconCookie, IconTool, IconSearch, IconHistory, IconBrandGithubCopilot } from '@tabler/icons';
 import Mousetrap from 'mousetrap';
 import { getKeyBindingsForActionAllOS } from 'providers/Hotkeys/keyMappings';
 import ToolHint from 'components/ToolHint';
@@ -10,8 +10,10 @@ import Cookies from 'components/Cookies';
 import Notifications from 'components/Notifications';
 import Portal from 'components/Portal';
 import { showPreferences, toggleSidebarCollapse } from 'providers/ReduxStore/slices/app';
-import { openConsole } from 'providers/ReduxStore/slices/logs';
+import { openConsole, setActiveTab } from 'providers/ReduxStore/slices/logs';
 import { toggleHistory } from 'providers/ReduxStore/slices/history';
+import { copilotActions } from 'providers/ReduxStore/slices/copilot';
+import { checkCopilotAuthStatus } from 'utils/ipc/copilot';
 import { useApp } from 'providers/App';
 import StyledWrapper from './StyledWrapper';
 
@@ -21,10 +23,30 @@ const StatusBar = () => {
   const logs = useSelector((state) => state.logs.logs);
   const sidebarCollapsed = useSelector((state) => state.app.sidebarCollapsed);
   const isHistoryOpen = useSelector((state) => state.history.isHistoryOpen);
+  const { authenticated, hasCopilotAccess } = useSelector((state) => state.copilot);
   const [cookiesOpen, setCookiesOpen] = useState(false);
   const { version } = useApp();
 
   const errorCount = logs.filter(log => log.type === 'error').length;
+
+  // Check Copilot authentication status on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const result = await checkCopilotAuthStatus();
+        if (result.authenticated) {
+          dispatch(copilotActions.setAuthStatus({
+            authenticated: result.authenticated,
+            hasCopilotAccess: result.hasCopilotAccess,
+            metadata: result.metadata
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to check Copilot auth status:', err);
+      }
+    };
+    checkAuth();
+  }, [dispatch]);
 
   const handleConsoleClick = () => {
     dispatch(openConsole());
@@ -32,6 +54,11 @@ const StatusBar = () => {
 
   const handleHistoryClick = () => {
     dispatch(toggleHistory());
+  };
+
+  const handleCopilotClick = () => {
+    dispatch(openConsole());
+    dispatch(setActiveTab('copilot'));
   };
 
   const openGlobalSearch = () => {
@@ -162,9 +189,24 @@ const StatusBar = () => {
                 )}
               </div>
             </button>
-            
+
+            <ToolHint text={authenticated && hasCopilotAccess ? 'GitHub Copilot Connected' : 'GitHub Copilot Disconnected'} toolhintId="Copilot Status" place="top" offset={10}>
+              <button
+                className={`status-bar-button copilot-status ${authenticated && hasCopilotAccess ? 'connected' : 'disconnected'}`}
+                data-trigger="copilot"
+                onClick={handleCopilotClick}
+                tabIndex={0}
+                aria-label={`GitHub Copilot ${authenticated && hasCopilotAccess ? 'Connected' : 'Disconnected'}`}
+              >
+                <div className="console-button-content">
+                  <IconBrandGithubCopilot size={16} strokeWidth={1.5} aria-hidden="true" />
+                  <span className={`copilot-status-dot ${authenticated && hasCopilotAccess ? 'connected' : 'disconnected'}`}></span>
+                </div>
+              </button>
+            </ToolHint>
+
             <div className="status-bar-divider"></div>
-            
+
             <div className="status-bar-version">
               v{version}
             </div>

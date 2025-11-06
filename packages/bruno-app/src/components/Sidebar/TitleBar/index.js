@@ -8,7 +8,7 @@ import ImportCollectionLocation from 'components/Sidebar/ImportCollectionLocatio
 import { IconDots } from '@tabler/icons';
 import { useState, forwardRef, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { showHomePage } from 'providers/ReduxStore/slices/app';
+import { showHomePage, showJsonAnonymizer } from 'providers/ReduxStore/slices/app';
 import { openCollection, importCollection } from 'providers/ReduxStore/slices/collections/actions';
 import StyledWrapper from './StyledWrapper';
 import { multiLineMsg } from "utils/common";
@@ -118,6 +118,17 @@ const TitleBar = () => {
               }}
             >
               Import Collection
+            </div>
+            <div className="dropdown-separator"></div>
+            <div className="dropdown-header">Tools</div>
+            <div
+              className="dropdown-item"
+              onClick={(e) => {
+                menuDropdownTippyRef.current.hide();
+                dispatch(showJsonAnonymizer());
+              }}
+            >
+              JSON Anonymizer
             </div>
           </Dropdown>
         </div>

@@ -10,6 +10,7 @@ const initialState = {
   screenWidth: 500,
   showHomePage: false,
   showPreferences: false,
+  showJsonAnonymizer: false,
   isEnvironmentSettingsModalOpen: false,
   preferences: {
     request: {
@@ -75,6 +76,14 @@ export const appSlice = createSlice({
     },
     showPreferences: (state, action) => {
       state.showPreferences = action.payload;
+    },
+    showJsonAnonymizer: (state) => {
+      state.showJsonAnonymizer = true;
+      state.showHomePage = false;
+      state.showPreferences = false;
+    },
+    hideJsonAnonymizer: (state) => {
+      state.showJsonAnonymizer = false;
     },
     updatePreferences: (state, action) => {
       state.preferences = action.payload;
@@ -224,6 +233,8 @@ export const {
   showHomePage,
   hideHomePage,
   showPreferences,
+  showJsonAnonymizer,
+  hideJsonAnonymizer,
   updatePreferences,
   updateCookies,
   insertTaskIntoQueue,

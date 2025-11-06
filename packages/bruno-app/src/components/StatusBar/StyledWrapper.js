@@ -70,6 +70,32 @@ const StyledWrapper = styled.div`
     align-items: center;
     padding: 2px 6px;
   }
+
+  .copilot-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-left: 4px;
+
+    &.connected {
+      background: #4caf50;
+      box-shadow: 0 0 4px #4caf50;
+    }
+
+    &.disconnected {
+      background: #9e9e9e;
+    }
+  }
+
+  .copilot-status {
+    &.connected {
+      color: #4caf50;
+    }
+
+    &.disconnected {
+      color: #9e9e9e;
+    }
+  }
 `;
 
 export default StyledWrapper; 

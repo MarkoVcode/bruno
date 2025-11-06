@@ -5,6 +5,7 @@ import RequestTabs from 'components/RequestTabs';
 import RequestTabPanel from 'components/RequestTabPanel';
 import Sidebar from 'components/Sidebar';
 import StatusBar from 'components/StatusBar';
+import JsonAnonymizer from 'components/JsonAnonymizer';
 // import ErrorCapture from 'components/ErrorCapture';
 import { useSelector } from 'react-redux';
 import { isElectron } from 'utils/common/platform';
@@ -54,6 +55,7 @@ export default function Main() {
   const activeTabUid = useSelector((state) => state.tabs.activeTabUid);
   const isDragging = useSelector((state) => state.app.isDragging);
   const showHomePage = useSelector((state) => state.app.showHomePage);
+  const showJsonAnonymizer = useSelector((state) => state.app.showJsonAnonymizer);
   const isConsoleOpen = useSelector((state) => state.logs.isConsoleOpen);
   const isHistoryOpen = useSelector((state) => state.history.isHistoryOpen);
   const mainSectionRef = useRef(null);
@@ -113,7 +115,9 @@ export default function Main() {
           <StyledWrapper className={className} style={{ height: '100%', zIndex: 1 }}>
             <Sidebar />
             <section className="flex flex-grow flex-col overflow-hidden">
-              {showHomePage ? (
+            {showJsonAnonymizer ? (
+              <JsonAnonymizer />
+            ) : showHomePage ? (
                 <Welcome />
               ) : (
                 <>
