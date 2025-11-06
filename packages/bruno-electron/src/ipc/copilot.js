@@ -6,6 +6,11 @@ const {
   getCopilotToken,
   refreshAccessToken
 } = require('../services/copilot/authentication');
+const {
+  sendChatCompletion,
+  sendChatCompletionStream,
+  createMessage
+} = require('../services/copilot/api-client');
 
 const copilotTokensStore = new CopilotTokensStore();
 
@@ -228,6 +233,93 @@ const registerCopilotIpc = () => {
       return {
         success: false,
         error: error.message
+      };
+    }
+  });
+
+  /**
+   * Send chat completion request
+   */
+  ipcMain.handle('copilot:chat-completion', async (event, { messages, model, temperature, maxTokens }) => {
+    try {
+      if (!copilotTokensStore.isAuthenticated()) {
+        return {
+          success: false,
+          error: 'Not authenticated with GitHub Copilot. Please authenticate first.'
+        };
+      }
+
+      const response = await sendChatCompletion({
+        messages,
+        model,
+        temperature,
+        maxTokens,
+        stream: false
+      });
+
+      return {
+        success: true,
+        response
+      };
+    } catch (error) {
+      console.error('Error sending chat completion:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to send chat completion'
+      };
+    }
+  });
+
+  /**
+   * Send streaming chat completion request
+   */
+  ipcMain.handle('copilot:chat-completion-stream', async (event, { messages, model, temperature, maxTokens }) => {
+    try {
+      if (!copilotTokensStore.isAuthenticated()) {
+        return {
+          success: false,
+          error: 'Not authenticated with GitHub Copilot. Please authenticate first.'
+        };
+      }
+
+      const win = BrowserWindow.fromWebContents(event.sender);
+      if (!win) {
+        return {
+          success: false,
+          error: 'Window not found'
+        };
+      }
+
+      // Start streaming
+      await sendChatCompletionStream({
+        messages,
+        model,
+        temperature,
+        maxTokens,
+        onChunk: (chunk) => {
+          // Send each chunk to the renderer process
+          win.webContents.send('copilot:chat-chunk', chunk);
+        }
+      });
+
+      // Send completion signal
+      win.webContents.send('copilot:chat-complete');
+
+      return {
+        success: true
+      };
+    } catch (error) {
+      console.error('Error sending streaming chat completion:', error);
+
+      // Send error to renderer
+      const win = BrowserWindow.fromWebContents(event.sender);
+      if (win) {
+        win.webContents.send('copilot:chat-error', { error: error.message });
+      }
+
+      return {
+        success: false,
+        error: error.message || 'Failed to send streaming chat completion'
       };
     }
   });
