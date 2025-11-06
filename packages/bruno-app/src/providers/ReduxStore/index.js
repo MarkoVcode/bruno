@@ -11,6 +11,7 @@ import performanceReducer from './slices/performance';
 import historyReducer from './slices/history';
 import traceReducer from './slices/trace';
 import hookTopBarReducer from './slices/hookTopBar';
+import copilotReducer from './slices/copilot';
 import { draftDetectMiddleware } from './middlewares/draft/middleware';
 
 const isDevEnv = () => {
@@ -33,7 +34,8 @@ export const store = configureStore({
     performance: performanceReducer,
     history: historyReducer,
     trace: traceReducer,
-    hookTopBar: hookTopBarReducer
+    hookTopBar: hookTopBarReducer,
+    copilot: copilotReducer
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(middleware)
 });

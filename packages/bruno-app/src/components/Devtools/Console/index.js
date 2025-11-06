@@ -2,19 +2,20 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import ReactJson from 'react-json-view';
 import { useTheme } from 'providers/Theme';
-import { 
-  IconX, 
-  IconTrash, 
+import {
+  IconX,
+  IconTrash,
   IconFilter,
-  IconAlertTriangle, 
-  IconAlertCircle, 
+  IconAlertTriangle,
+  IconAlertCircle,
   IconBug,
   IconCode,
   IconChevronDown,
   IconTerminal2,
   IconNetwork,
   IconDashboard,
-  IconRoute
+  IconRoute,
+  IconBrandGithubCopilot
 } from '@tabler/icons';
 import { 
   closeConsole, 
@@ -33,6 +34,7 @@ import RequestDetailsPanel from './RequestDetailsPanel';
 import ErrorDetailsPanel from './ErrorDetailsPanel';
 import Performance from '../Performance';
 import Trace from '../Trace';
+import Copilot from '../Copilot';
 import StyledWrapper from './StyledWrapper';
 
 const LogIcon = ({ type }) => {
@@ -393,6 +395,8 @@ const Console = () => {
         return <Performance />;
       case 'trace':
         return <Trace />;
+      case 'copilot':
+        return <Copilot />;
       // case 'debug':
       //   return <DebugTab />;
       default:
@@ -507,6 +511,14 @@ const Console = () => {
           >
             <IconRoute size={16} strokeWidth={1.5} />
             <span>Trace</span>
+          </button>
+
+          <button
+            className={`console-tab ${activeTab === 'copilot' ? 'active' : ''}`}
+            onClick={() => handleTabChange('copilot')}
+          >
+            <IconBrandGithubCopilot size={16} strokeWidth={1.5} />
+            <span>Copilot</span>
           </button>
 
           {/* <button

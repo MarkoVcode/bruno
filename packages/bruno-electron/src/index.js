@@ -38,6 +38,7 @@ const registerCollectionsIpc = require('./ipc/collection');
 const registerFilesystemIpc = require('./ipc/filesystem');
 const registerPreferencesIpc = require('./ipc/preferences');
 const registerSystemMonitorIpc = require('./ipc/system-monitor');
+const registerCopilotIpc = require('./ipc/copilot');
 const collectionWatcher = require('./app/collection-watcher');
 const { loadWindowState, saveBounds, saveMaximized } = require('./utils/window');
 const registerNotificationsIpc = require('./ipc/notifications');
@@ -222,6 +223,7 @@ app.on('ready', async () => {
   registerFilesystemIpc(mainWindow);
   registerRequestHistoryIpc(mainWindow);
   registerSystemMonitorIpc(mainWindow, systemMonitor);
+  registerCopilotIpc();
 });
 
 // Quit the app once all windows are closed
