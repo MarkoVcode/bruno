@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { IconCopy, IconCheck, IconAlertCircle, IconBrandGithubCopilot, IconLoader2, IconSparkles } from '@tabler/icons';
+import { IconCopy, IconCheck, IconAlertCircle, IconBrandGithubCopilot, IconLoader2, IconStars } from '@tabler/icons';
 import { hideJsonAnonymizer } from 'providers/ReduxStore/slices/app';
 import { checkCopilotAuthStatus, sendChatCompletion } from 'utils/ipc/copilot';
 import { copilotActions } from 'providers/ReduxStore/slices/copilot';
@@ -140,7 +140,7 @@ const JsonAnonymizer = () => {
       <div className="json-anonymizer-container">
         <div className="json-anonymizer-header">
           <div className="header-left">
-            <IconSparkles size={24} strokeWidth={1.5} className="title-icon" />
+            <IconStars size={24} strokeWidth={1.5} className="title-icon" />
             <h1 className="title">JSON Anonymizer</h1>
             <span className="subtitle">Powered by GitHub Copilot</span>
           </div>
