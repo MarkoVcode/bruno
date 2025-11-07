@@ -47,11 +47,19 @@ export const refreshCopilotToken = () => {
 /**
  * Listen for verification required event
  * @param {Function} callback - Callback function to handle verification info
+ * @returns {Function} Cleanup function to remove the listener
  */
 export const onVerificationRequired = (callback) => {
-  return window.ipcRenderer.on('copilot:verification-required', (event, data) => {
+  const handler = (event, data) => {
     callback(data);
-  });
+  };
+
+  window.ipcRenderer.on('copilot:verification-required', handler);
+
+  // Return cleanup function
+  return () => {
+    window.ipcRenderer.removeListener('copilot:verification-required', handler);
+  };
 };
 
 /**
