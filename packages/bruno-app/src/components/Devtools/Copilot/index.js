@@ -48,10 +48,14 @@ const Copilot = () => {
     console.log('Setting up verification listener...');
     const unsubscribe = onVerificationRequired((info) => {
       console.log('Verification required event received:', info);
-      dispatch(copilotActions.setVerificationInfo({
-        verificationUri: info.verificationUri,
-        userCode: info.userCode
-      }));
+      if (info && info.verificationUri && info.userCode) {
+        dispatch(copilotActions.setVerificationInfo({
+          verificationUri: info.verificationUri,
+          userCode: info.userCode
+        }));
+      } else {
+        console.warn('Invalid verification info received:', info);
+      }
     });
 
     return () => {
