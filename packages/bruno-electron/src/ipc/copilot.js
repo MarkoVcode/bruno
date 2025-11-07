@@ -23,18 +23,25 @@ const registerCopilotIpc = () => {
    */
   ipcMain.handle('copilot:start-auth', async (event) => {
     try {
+      console.log('[Copilot IPC] Starting authentication...');
       let verificationInfo = null;
 
       // Start device flow, callback will receive verification URL
       const tokens = await startDeviceFlow((info) => {
+        console.log('[Copilot IPC] Verification callback received:', info);
         verificationInfo = info;
 
         // Send verification info to renderer process
         const win = BrowserWindow.fromWebContents(event.sender);
         if (win) {
+          console.log('[Copilot IPC] Sending verification-required event to renderer');
           win.webContents.send('copilot:verification-required', info);
+        } else {
+          console.error('[Copilot IPC] No window found for sender');
         }
       });
+
+      console.log('[Copilot IPC] Device flow completed, got tokens');
 
       // Calculate expiry time
       const expiresIn = tokens.expiresAt ? Math.floor((tokens.expiresAt - Date.now()) / 1000) : null;
