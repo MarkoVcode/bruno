@@ -69,9 +69,9 @@ const Copilot = () => {
       console.log('[Copilot Component] Starting authentication...');
       dispatch(copilotActions.startAuthentication());
 
-      // Add timeout to prevent hanging forever
+      // Add timeout to prevent hanging forever (15 minutes for OAuth flow)
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Authentication timeout - no response from server')), 60000));
+        setTimeout(() => reject(new Error('Authentication timeout - no response from server')), 900000));
 
       const result = await Promise.race([
         startCopilotAuth(),
