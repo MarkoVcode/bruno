@@ -56,9 +56,13 @@ export const onVerificationRequired = (callback) => {
 
   window.ipcRenderer.on('copilot:verification-required', handler);
 
-  // Return cleanup function
+  // Return cleanup function (use 'off' for newer Electron versions)
   return () => {
-    window.ipcRenderer.removeListener('copilot:verification-required', handler);
+    if (window.ipcRenderer.off) {
+      window.ipcRenderer.off('copilot:verification-required', handler);
+    } else if (window.ipcRenderer.removeListener) {
+      window.ipcRenderer.removeListener('copilot:verification-required', handler);
+    }
   };
 };
 
