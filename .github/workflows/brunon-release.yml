@@ -10,8 +10,8 @@ defaults:
     shell: bash
 
 jobs:
-  build-linux:
-    name: Build Linux Packages
+  build-linux-and-macos:
+    name: Build Linux and macOS Packages
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -50,12 +50,15 @@ jobs:
       - name: Build BrunoN Linux packages
         run: npm run release:brunon:linux
 
+      - name: Build BrunoN macOS packages (ZIP only, cross-platform)
+        run: npm run release:brunon:mac
+
       - name: List artifacts
         run: ls -lh packages/bruno-electron/out/
 
       - uses: actions/upload-artifact@v4
         with:
-          name: brunon-linux
+          name: brunon-linux-and-macos
           path: packages/bruno-electron/out/**
           if-no-files-found: error
 
@@ -103,101 +106,11 @@ jobs:
           path: packages/bruno-electron/out/**
           if-no-files-found: error
 
-  build-macos-x64:
-    name: Build macOS (Intel)
-    runs-on: macos-15
-    permissions:
-      contents: read
-    env:
-      CSC_IDENTITY_AUTO_DISCOVERY: false
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-node@v5
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Install node dependencies
-        run: npm ci --legacy-peer-deps
-
-      - name: Build shared libraries
-        run: |
-          npm run build:graphql-docs
-          npm run build:bruno-common
-          npm run build:bruno-query
-          npm run sandbox:bundle-libraries --workspace=packages/bruno-js
-          npm run build:bruno-converters
-          npm run build:bruno-requests
-          npm run build:bruno-filestore
-
-      - name: Build BrunoN macOS (Intel) packages
-        run: npm run release:brunon:mac -- --x64
-
-      - name: List artifacts
-        run: ls -lh packages/bruno-electron/out/
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: brunon-macos-x64
-          path: packages/bruno-electron/out/**
-          if-no-files-found: error
-
-  build-macos-arm64:
-    name: Build macOS (Apple Silicon)
-    runs-on: macos-15
-    permissions:
-      contents: read
-    env:
-      CSC_IDENTITY_AUTO_DISCOVERY: false
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-node@v5
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Install node dependencies
-        run: npm ci --legacy-peer-deps
-
-      - name: Build shared libraries
-        run: |
-          npm run build:graphql-docs
-          npm run build:bruno-common
-          npm run build:bruno-query
-          npm run sandbox:bundle-libraries --workspace=packages/bruno-js
-          npm run build:bruno-converters
-          npm run build:bruno-requests
-          npm run build:bruno-filestore
-
-      - name: Build BrunoN macOS (Apple Silicon) packages
-        run: npm run release:brunon:mac -- --arm64
-
-      - name: List artifacts
-        run: ls -lh packages/bruno-electron/out/
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: brunon-macos-arm64
-          path: packages/bruno-electron/out/**
-          if-no-files-found: error
-
   publish-release:
     name: Create GitHub Release
     needs:
-      - build-linux
+      - build-linux-and-macos
       - build-windows
-      - build-macos-x64
-      - build-macos-arm64
     runs-on: ubuntu-latest
     permissions:
       contents: write
