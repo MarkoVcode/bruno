@@ -5,7 +5,7 @@ module.exports = function aboutBruno({ version, productName = 'BrunoN' }) {
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
-        <title>About Bruno</title>
+        <title>About BrunoN</title>
         <style>
             body {
                 font-family: Arial, sans-serif;

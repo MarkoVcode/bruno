@@ -82,7 +82,7 @@ const template = [
     role: 'help',
     submenu: [
       {
-        label: 'About Bruno',
+        label: 'About BrunoN',
         click: () => {
           const aboutWindow = new BrowserWindow({
             width: 350,
