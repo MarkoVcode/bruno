@@ -3,8 +3,7 @@
 set -e
 
 # BrunoN release build script
-# This script applies BrunoN branding and builds release packages
-# Only run during release builds to minimize code changes
+# Simplified version that uses .env for configuration
 
 PLATFORM=$1
 
@@ -16,59 +15,38 @@ fi
 
 echo "Building BrunoN release for platform: $PLATFORM"
 
-# Set BrunoN release environment variables
-export BRUNON_RELEASE=true
-
-# Get version from git tag if available
+# Get version from git tag if available and export as environment variable
 if git describe --tags --exact-match >/dev/null 2>&1; then
-  export BRUNON_GIT_TAG=$(git describe --tags --exact-match)
-  echo "Using git tag version: $BRUNON_GIT_TAG"
+  export BRUNON_VERSION=$(git describe --tags --exact-match)
+  echo "Using git tag version: $BRUNON_VERSION"
 else
-  echo "Warning: Not on a tagged commit. Version will use package.json value only."
+  echo "Using default version from .env or package.json"
 fi
 
 # Step 1: Build required packages
 echo "Building required packages..."
 npm run build:openapi-docs
 
-# Step 2: Apply BrunoN branding to UI files
-echo "Applying BrunoN branding..."
-node scripts/apply-brunon-branding.js
-
-# Step 3: Build web application
+# Step 2: Build web application
 echo "Building web application..."
 npm run build:web
 
-# Step 4: Prepare Electron web assets
+# Step 3: Prepare Electron web assets
 echo "Preparing Electron web assets..."
 
 # Remove old build directories
 rm -rf packages/bruno-electron/out
 rm -rf packages/bruno-electron/web
 
-# Create new web directory
-mkdir -p packages/bruno-electron/web
-
 # Copy web build
-cp -r packages/bruno-app/dist/* packages/bruno-electron/web
+cp -r packages/bruno-app/dist packages/bruno-electron/web
 
-# Update static paths for Electron
-if [ "$(uname)" == "Darwin" ]; then
-  # macOS sed syntax
-  find packages/bruno-electron/web -name "*.html" -exec sed -i '' 's@/static/@static/@g' {} \;
-  find packages/bruno-electron/web/static/css -name "*.css" -exec sed -i '' 's@/static/font@../../static/font@g' {} \;
-else
-  # Linux sed syntax
-  find packages/bruno-electron/web -name "*.html" -exec sed -i 's@/static/@static/@g' {} \;
-  find packages/bruno-electron/web/static/css -name "*.css" -exec sed -i 's@/static/font@../../static/font@g' {} \;
-fi
-
-# Remove sourcemaps
+# Remove sourcemaps (optional, reduces size)
 find packages/bruno-electron/web -name '*.map' -type f -delete
 
 echo "Web assets prepared"
 
-# Step 5: Build Electron distributables
+# Step 4: Build Electron distributables
 echo "Building Electron package for $PLATFORM..."
 
 case "$PLATFORM" in

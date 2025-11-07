@@ -2,8 +2,7 @@
 setlocal enabledelayedexpansion
 
 REM BrunoN release build script for Windows
-REM This script applies BrunoN branding and builds release packages
-REM Only run during release builds to minimize code changes
+REM Simplified version that uses .env for configuration
 
 set PLATFORM=%1
 
@@ -15,16 +14,13 @@ if "%PLATFORM%"=="" (
 
 echo Building BrunoN release for platform: %PLATFORM%
 
-REM Set BrunoN release environment variables
-set BRUNON_RELEASE=true
-
-REM Get version from git tag if available
+REM Get version from git tag if available and export as environment variable
 git describe --tags --exact-match >nul 2>&1
 if %errorlevel% equ 0 (
-  for /f "tokens=*" %%i in ('git describe --tags --exact-match') do set BRUNON_GIT_TAG=%%i
-  echo Using git tag version: !BRUNON_GIT_TAG!
+  for /f "tokens=*" %%i in ('git describe --tags --exact-match') do set BRUNON_VERSION=%%i
+  echo Using git tag version: !BRUNON_VERSION!
 ) else (
-  echo Warning: Not on a tagged commit. Version will use package.json value only.
+  echo Using default version from .env or package.json
 )
 
 REM Step 1: Build required packages
@@ -32,39 +28,27 @@ echo Building required packages...
 call npm run build:openapi-docs
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-REM Step 2: Apply BrunoN branding to UI files
-echo Applying BrunoN branding...
-node scripts/apply-brunon-branding.js
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-REM Step 3: Build web application
+REM Step 2: Build web application
 echo Building web application...
 call npm run build:web
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-REM Step 4: Prepare Electron web assets
+REM Step 3: Prepare Electron web assets
 echo Preparing Electron web assets...
 
 REM Remove old build directories
 if exist packages\bruno-electron\out rmdir /s /q packages\bruno-electron\out
 if exist packages\bruno-electron\web rmdir /s /q packages\bruno-electron\web
 
-REM Create new web directory
-mkdir packages\bruno-electron\web
-
 REM Copy web build
 xcopy /s /e /i packages\bruno-app\dist packages\bruno-electron\web
 
-REM Update static paths for Electron using PowerShell
-powershell -Command "Get-ChildItem packages\bruno-electron\web -Filter *.html -Recurse | ForEach-Object { (Get-Content $_.FullName) -replace '/static/', 'static/' | Set-Content $_.FullName }"
-powershell -Command "Get-ChildItem packages\bruno-electron\web\static\css -Filter *.css -Recurse | ForEach-Object { (Get-Content $_.FullName) -replace '/static/font', '../../static/font' | Set-Content $_.FullName }"
-
-REM Remove sourcemaps
+REM Remove sourcemaps (optional, reduces size)
 for /r packages\bruno-electron\web %%f in (*.map) do del "%%f"
 
 echo Web assets prepared
 
-REM Step 5: Build Electron distributables
+REM Step 4: Build Electron distributables
 echo Building Electron package for %PLATFORM%...
 
 if "%PLATFORM%"=="snap" (

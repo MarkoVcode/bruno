@@ -1,18 +1,13 @@
-require('dotenv').config({ path: process.env.DOTENV_PATH });
+require('dotenv').config({ path: process.env.DOTENV_PATH || '.env' });
 
-// Support BrunoN branding for release builds
-const isBrunoNRelease = process.env.BRUNON_RELEASE === 'true';
-const productName = isBrunoNRelease ? 'BrunoN' : 'Bruno';
+// Product name is always BrunoN
+const productName = 'BrunoN';
 
-// Get version from BRUNON_GIT_TAG environment variable (set by build script)
-// Format: v1.0.0 -> 1.0.0
-const version = process.env.BRUNON_GIT_TAG
-  ? process.env.BRUNON_GIT_TAG.replace(/^v/, '')
-  : require('./package.json').version;
+// Get version from environment variable (can be overridden by build script)
+// Priority: BRUNON_VERSION env var > .env file > package.json
+const version = (process.env.BRUNON_VERSION || require('./package.json').version).replace(/^v/, '');
 
-// macOS code signing configuration
-// BrunoN builds are unsigned (no Apple Developer account)
-// Bruno builds use proper code signing with notarization
+// macOS configuration - BrunoN builds are unsigned (no Apple Developer account)
 const macConfig = {
   artifactName: '${productName}_${buildVersion}_${arch}_${os}.${ext}',
   category: 'public.app-category.developer-tools',
@@ -28,14 +23,6 @@ const macConfig = {
   ],
   icon: 'resources/icons/mac/icon.icns'
 };
-
-// Only add code signing configuration for official Bruno builds
-if (!isBrunoNRelease) {
-  macConfig.hardenedRuntime = true;
-  macConfig.identity = 'Anoop MD (W7LPPWA48L)';
-  macConfig.entitlements = 'resources/entitlements.mac.plist';
-  macConfig.entitlementsInherit = 'resources/entitlements.mac.plist';
-}
 
 const config = {
   appId: 'com.usebruno.app',
@@ -53,8 +40,8 @@ const config = {
     }
   ],
   files: ['**/*'],
-  // Only enable notarization for official Bruno builds
-  afterSign: isBrunoNRelease ? undefined : 'notarize.js',
+  // BrunoN builds are not notarized (no Apple Developer account)
+  afterSign: undefined,
   mac: macConfig,
   linux: {
     artifactName: '${productName}_${buildVersion}_${arch}_linux.${ext}',
