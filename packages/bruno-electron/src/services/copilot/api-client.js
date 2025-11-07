@@ -7,6 +7,9 @@
 
 const axios = require('axios');
 const { getCopilotToken, refreshAccessToken } = require('./authentication');
+const CopilotTokensStore = require('../../store/copilot-tokens');
+
+const copilotTokensStore = new CopilotTokensStore();
 
 // GitHub Copilot API endpoints
 const COPILOT_API_BASE = 'https://api.githubcopilot.com';
@@ -69,12 +72,19 @@ async function sendChatCompletion({ messages, model = 'gpt-4o', temperature = 0.
   }
 
   const makeRequest = async () => {
-    const token = await getCopilotToken();
-    if (!token) {
-      throw new Error('No valid Copilot token available. Please authenticate first.');
+    // Get GitHub access token from store
+    const githubToken = copilotTokensStore.getAccessToken();
+    if (!githubToken) {
+      throw new Error('Not authenticated. Please authenticate with GitHub Copilot first.');
     }
 
-    const client = createAuthenticatedClient(token);
+    // Get Copilot API token using GitHub token
+    const copilotTokenData = await getCopilotToken(githubToken);
+    if (!copilotTokenData || !copilotTokenData.token) {
+      throw new Error('Failed to obtain Copilot API token.');
+    }
+
+    const client = createAuthenticatedClient(copilotTokenData.token);
 
     const requestBody = {
       messages,
@@ -103,12 +113,19 @@ async function sendChatCompletionStream({ messages, model = 'gpt-4o', temperatur
   }
 
   const makeRequest = async () => {
-    const token = await getCopilotToken();
-    if (!token) {
-      throw new Error('No valid Copilot token available. Please authenticate first.');
+    // Get GitHub access token from store
+    const githubToken = copilotTokensStore.getAccessToken();
+    if (!githubToken) {
+      throw new Error('Not authenticated. Please authenticate with GitHub Copilot first.');
     }
 
-    const client = createAuthenticatedClient(token);
+    // Get Copilot API token using GitHub token
+    const copilotTokenData = await getCopilotToken(githubToken);
+    if (!copilotTokenData || !copilotTokenData.token) {
+      throw new Error('Failed to obtain Copilot API token.');
+    }
+
+    const client = createAuthenticatedClient(copilotTokenData.token);
 
     const requestBody = {
       messages,
