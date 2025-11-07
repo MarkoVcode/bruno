@@ -45,7 +45,9 @@ const Copilot = () => {
     checkAuth();
 
     // Listen for verification events
+    console.log('Setting up verification listener...');
     const unsubscribe = onVerificationRequired((info) => {
+      console.log('Verification required event received:', info);
       dispatch(copilotActions.setVerificationInfo({
         verificationUri: info.verificationUri,
         userCode: info.userCode
@@ -53,6 +55,7 @@ const Copilot = () => {
     });
 
     return () => {
+      console.log('Cleaning up verification listener');
       if (unsubscribe) unsubscribe();
     };
   }, [dispatch]);
