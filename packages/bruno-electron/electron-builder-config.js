@@ -8,14 +8,12 @@ const productName = 'BrunoN';
 const version = (process.env.BRUNON_VERSION || require('./package.json').version).replace(/^v/, '');
 
 // macOS configuration - BrunoN builds are unsigned (no Apple Developer account)
+// ZIP target works on all platforms (Linux/macOS/Windows)
+// DMG requires macOS - only enable when building on macOS
 const macConfig = {
   artifactName: '${productName}_${buildVersion}_${arch}_${os}.${ext}',
   category: 'public.app-category.developer-tools',
   target: [
-    {
-      target: 'dmg',
-      arch: ['x64', 'arm64']
-    },
     {
       target: 'zip',
       arch: ['x64', 'arm64']
