@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { IconBrandGithubCopilot, IconCheck, IconX, IconLoader2 } from '@tabler/icons';
+import { IconBrandGithubCopilot, IconCheck, IconX, IconLoader2, IconCopy } from '@tabler/icons';
+import toast from 'react-hot-toast';
 import StyledWrapper from './StyledWrapper';
 import { copilotActions } from 'providers/ReduxStore/slices/copilot';
 import {
@@ -25,6 +26,8 @@ const Copilot = () => {
 
   // Check authentication status on mount
   useEffect(() => {
+    console.log('[Copilot Component] ===== Component mounted - Build v4 =====');
+
     const checkAuth = async () => {
       try {
         const result = await checkCopilotAuthStatus();
@@ -45,42 +48,87 @@ const Copilot = () => {
     checkAuth();
 
     // Listen for verification events
-    console.log('Setting up verification listener...');
+    console.log('[Copilot Component] ===== Setting up verification listener =====');
     const unsubscribe = onVerificationRequired((info) => {
-      console.log('Verification required event received:', info);
+      console.log('[Copilot Component] ===== Verification event received =====');
+      console.log('[Copilot Component] Raw info:', info);
+      console.log('[Copilot Component] Info type:', typeof info);
+      console.log('[Copilot Component] Info is null:', info === null);
+      console.log('[Copilot Component] Info is undefined:', info === undefined);
+      console.log('[Copilot Component] Info stringified:', JSON.stringify(info, null, 2));
+
       if (info && info.verificationUri && info.userCode) {
+        console.log('[Copilot Component] Valid verification info, dispatching to Redux');
+        console.log('[Copilot Component] verificationUri:', info.verificationUri);
+        console.log('[Copilot Component] userCode:', info.userCode);
         dispatch(copilotActions.setVerificationInfo({
           verificationUri: info.verificationUri,
           userCode: info.userCode
         }));
+        console.log('[Copilot Component] Redux dispatch completed');
       } else {
-        console.warn('Invalid verification info received:', info);
+        console.warn('[Copilot Component] Invalid verification info received');
+        console.warn('[Copilot Component] Has info:', !!info);
+        console.warn('[Copilot Component] Has verificationUri:', !!info?.verificationUri);
+        console.warn('[Copilot Component] Has userCode:', !!info?.userCode);
       }
     });
 
+    console.log('[Copilot Component] Verification listener setup complete');
+
     return () => {
-      console.log('Cleaning up verification listener');
+      console.log('[Copilot Component] Cleaning up verification listener');
       if (unsubscribe) unsubscribe();
     };
   }, [dispatch]);
 
   const handleStartAuth = async () => {
     try {
-      console.log('[Copilot Component] Starting authentication...');
+      console.log('[Copilot Component] ===== handleStartAuth called =====');
       dispatch(copilotActions.startAuthentication());
+      console.log('[Copilot Component] Redux startAuthentication dispatched');
 
       // Add timeout to prevent hanging forever (15 minutes for OAuth flow)
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Authentication timeout - no response from server')), 900000));
 
+      console.log('[Copilot Component] About to call startCopilotAuth IPC...');
       const result = await Promise.race([
         startCopilotAuth(),
         timeoutPromise
       ]);
 
-      console.log('[Copilot Component] Authentication result:', result);
+      console.log('[Copilot Component] ===== Authentication IPC returned =====');
+      console.log('[Copilot Component] Result:', JSON.stringify(result, null, 2));
+      console.log('[Copilot Component] Result.success:', result.success);
+      console.log('[Copilot Component] Result has verificationInfo:', !!result.verificationInfo);
+
+      // Handle verification info if it's in the response (fallback for when event doesn't arrive)
+      if (result.verificationInfo) {
+        console.log('[Copilot Component] ===== Found verificationInfo in response (fallback) =====');
+        console.log('[Copilot Component] verificationInfo:', JSON.stringify(result.verificationInfo, null, 2));
+        console.log('[Copilot Component] Has verificationUri:', !!result.verificationInfo.verificationUri);
+        console.log('[Copilot Component] Has userCode:', !!result.verificationInfo.userCode);
+
+        if (result.verificationInfo.verificationUri && result.verificationInfo.userCode) {
+          console.log('[Copilot Component] Setting verification info from response fallback');
+          console.log('[Copilot Component] verificationUri:', result.verificationInfo.verificationUri);
+          console.log('[Copilot Component] userCode:', result.verificationInfo.userCode);
+          dispatch(copilotActions.setVerificationInfo({
+            verificationUri: result.verificationInfo.verificationUri,
+            userCode: result.verificationInfo.userCode
+          }));
+          console.log('[Copilot Component] Verification info dispatched to Redux from response');
+        } else {
+          console.warn('[Copilot Component] verificationInfo exists but missing required fields');
+        }
+      } else {
+        console.log('[Copilot Component] No verificationInfo in response - relying on event');
+      }
 
       if (result.success) {
+        console.log('[Copilot Component] Authentication successful');
+        console.log('[Copilot Component] hasCopilotAccess:', result.hasCopilotAccess);
         dispatch(copilotActions.authenticationSuccess({
           // Ensure hasCopilotAccess is a boolean
           hasCopilotAccess: typeof result.hasCopilotAccess === 'boolean'
@@ -88,13 +136,18 @@ const Copilot = () => {
             : !!result.hasCopilotAccess,
           metadata: result.copilotToken
         }));
+        console.log('[Copilot Component] Authentication success dispatched to Redux');
       } else {
+        console.log('[Copilot Component] Authentication failed:', result.error);
         dispatch(copilotActions.authenticationFailure({
           error: result.error || 'Authentication failed'
         }));
       }
     } catch (err) {
-      console.error('[Copilot Component] Authentication error:', err);
+      console.error('[Copilot Component] ===== Authentication error =====');
+      console.error('[Copilot Component] Error:', err);
+      console.error('[Copilot Component] Error message:', err.message);
+      console.error('[Copilot Component] Error stack:', err.stack);
       dispatch(copilotActions.authenticationFailure({
         error: err.message || 'An unexpected error occurred'
       }));
@@ -107,6 +160,13 @@ const Copilot = () => {
       dispatch(copilotActions.logout());
     } catch (err) {
       console.error('Logout error:', err);
+    }
+  };
+
+  const handleCopyCode = () => {
+    if (userCode) {
+      navigator.clipboard.writeText(userCode);
+      toast.success('Code copied to clipboard!');
     }
   };
 
@@ -198,7 +258,12 @@ const Copilot = () => {
 
                 <div className="user-code-prominent">
                   <div className="user-code-label">Your Verification Code:</div>
-                  <div className="user-code-value-large">{userCode}</div>
+                  <div className="user-code-container">
+                    <div className="user-code-value-large">{userCode}</div>
+                    <button className="copy-code-button" onClick={handleCopyCode} title="Copy code">
+                      <IconCopy size={20} />
+                    </button>
+                  </div>
                   <div className="user-code-hint">Enter this code on the GitHub page that just opened</div>
                 </div>
 

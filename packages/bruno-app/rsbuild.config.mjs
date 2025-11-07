@@ -18,6 +18,10 @@ export default defineConfig({
       }
     })
   ],
+  output: {
+    // Use relative paths for Electron file:// protocol
+    assetPrefix: './'
+  },
   source: {
     tsconfigPath: './jsconfig.json', // Specifies the path to the JavaScript/TypeScript configuration file,
     exclude: [

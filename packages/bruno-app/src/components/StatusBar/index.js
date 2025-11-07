@@ -26,6 +26,7 @@ const StatusBar = () => {
   const { authenticated, hasCopilotAccess } = useSelector((state) => state.copilot);
   const [cookiesOpen, setCookiesOpen] = useState(false);
   const { version } = useApp();
+  const brunonReleaseTag = '';
 
   const errorCount = logs.filter(log => log.type === 'error').length;
 
@@ -208,7 +209,7 @@ const StatusBar = () => {
             <div className="status-bar-divider"></div>
 
             <div className="status-bar-version">
-              v{version}
+              {brunonReleaseTag || `v${version}`}
             </div>
           </div>
         </div>

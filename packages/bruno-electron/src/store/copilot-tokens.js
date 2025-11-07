@@ -52,7 +52,8 @@ class CopilotTokensStore {
       return null;
     }
 
-    return decryptStringSafe(encryptedToken);
+    const result = decryptStringSafe(encryptedToken);
+    return result.success ? result.value : null;
   }
 
   /**
@@ -65,7 +66,8 @@ class CopilotTokensStore {
       return null;
     }
 
-    return decryptStringSafe(encryptedToken);
+    const result = decryptStringSafe(encryptedToken);
+    return result.success ? result.value : null;
   }
 
   /**
@@ -78,8 +80,14 @@ class CopilotTokensStore {
    * @param {string[]} tokens.scopes
    */
   setTokens({ accessToken, refreshToken, expiresIn, tokenType = 'bearer', scopes = [] }) {
-    const encryptedAccessToken = encryptStringSafe(accessToken);
-    const encryptedRefreshToken = refreshToken ? encryptStringSafe(refreshToken) : null;
+    const accessTokenResult = encryptStringSafe(accessToken);
+    const encryptedAccessToken = accessTokenResult.success ? accessTokenResult.value : null;
+
+    let encryptedRefreshToken = null;
+    if (refreshToken) {
+      const refreshTokenResult = encryptStringSafe(refreshToken);
+      encryptedRefreshToken = refreshTokenResult.success ? refreshTokenResult.value : null;
+    }
 
     const expiresAt = expiresIn ? Date.now() + (expiresIn * 1000) : null;
 
@@ -120,7 +128,8 @@ class CopilotTokensStore {
    * @param {number} expiresIn
    */
   updateAccessToken(accessToken, expiresIn) {
-    const encryptedAccessToken = encryptStringSafe(accessToken);
+    const accessTokenResult = encryptStringSafe(accessToken);
+    const encryptedAccessToken = accessTokenResult.success ? accessTokenResult.value : null;
     const expiresAt = expiresIn ? Date.now() + (expiresIn * 1000) : null;
 
     this.store.set('accessToken', encryptedAccessToken);

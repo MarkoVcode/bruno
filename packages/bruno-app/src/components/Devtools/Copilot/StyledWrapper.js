@@ -157,6 +157,13 @@ const StyledWrapper = styled.div`
     letter-spacing: 0.5px;
   }
 
+  .user-code-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
   .user-code-value-large {
     font-size: 32px;
     font-weight: 700;
@@ -168,6 +175,29 @@ const StyledWrapper = styled.div`
     background: rgba(76, 175, 80, 0.1);
     border-radius: 6px;
     user-select: all;
+  }
+
+  .copy-code-button {
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    border-radius: 6px;
+    color: #4caf50;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(76, 175, 80, 0.2);
+      border-color: #4caf50;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
   }
 
   .user-code-hint {

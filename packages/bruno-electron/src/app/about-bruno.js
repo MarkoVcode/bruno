@@ -1,4 +1,4 @@
-module.exports = function aboutBruno({ version, productName = 'Bruno' }) {
+module.exports = function aboutBruno({ version, productName = 'BrunoN' }) {
   return `
     <!DOCTYPE html>
     <html lang="en">

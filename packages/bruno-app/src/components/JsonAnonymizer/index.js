@@ -2,11 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { IconCopy, IconCheck, IconAlertCircle, IconBrandGithubCopilot, IconLoader2, IconStars } from '@tabler/icons';
 import { hideJsonAnonymizer } from 'providers/ReduxStore/slices/app';
-import { checkCopilotAuthStatus, sendChatCompletion } from 'utils/ipc/copilot';
+import { checkCopilotAuthStatus, sendChatCompletion, getCopilotModels } from 'utils/ipc/copilot';
 import { copilotActions } from 'providers/ReduxStore/slices/copilot';
 import Console from 'components/Devtools/Console';
 import toast from 'react-hot-toast';
 import StyledWrapper from './StyledWrapper';
+
+const DEFAULT_MODELS = [
+  { id: 'gpt-4o', name: 'GPT-4o' },
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini' },
+  { id: 'gpt-4', name: 'GPT-4' },
+  { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
+  { id: 'o1-preview', name: 'O1 Preview' },
+  { id: 'o1-mini', name: 'O1 Mini' }
+];
 
 const JsonAnonymizer = () => {
   const dispatch = useDispatch();
@@ -17,8 +26,10 @@ const JsonAnonymizer = () => {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
   const [isConsoleOpen, setIsConsoleOpen] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('gpt-4o');
+  const [availableModels, setAvailableModels] = useState(DEFAULT_MODELS);
 
-  // Check authentication status on mount
+  // Check authentication status and fetch models on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -34,7 +45,20 @@ const JsonAnonymizer = () => {
         console.error('Failed to check auth status:', err);
       }
     };
+
+    const fetchModels = async () => {
+      try {
+        const result = await getCopilotModels();
+        if (result.success && result.models) {
+          setAvailableModels(result.models);
+        }
+      } catch (err) {
+        console.error('Failed to fetch models:', err);
+      }
+    };
+
     checkAuth();
+    fetchModels();
   }, [dispatch]);
 
   const handleClose = () => {
@@ -102,7 +126,7 @@ const JsonAnonymizer = () => {
 
       const result = await sendChatCompletion({
         messages,
-        model: 'gpt-4o',
+        model: selectedModel,
         temperature: 0.7,
         maxTokens: 4000
       });
@@ -144,9 +168,27 @@ const JsonAnonymizer = () => {
             <h1 className="title">JSON Anonymizer</h1>
             <span className="subtitle">Powered by GitHub Copilot</span>
           </div>
-          <button className="close-button" onClick={handleClose} title="Close">
-            ×
-          </button>
+          <div className="header-right">
+            <div className="model-selector">
+              <label htmlFor="model-select">Model:</label>
+              <select
+                id="model-select"
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                disabled={processing}
+                className="model-select"
+              >
+                {availableModels.map((model) => (
+                  <option key={model.id} value={model.id}>
+                    {model.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button className="close-button" onClick={handleClose} title="Close">
+              ×
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -169,7 +211,33 @@ const JsonAnonymizer = () => {
                 setInputJson(e.target.value);
                 setError(null);
               }}
-              placeholder='{\n  "name": "John Doe",\n  "email": "john@example.com",\n  "phone": "+1234567890"\n}'
+              placeholder={`{
+  "_id": "690dd4e1928829cc3757fb7e",
+  "index": 0,
+  "guid": "ae047ce1-c560-4dea-9da6-396d25cc5801",
+  "isActive": true,
+  "balance": "$1,861.71",
+  "picture": "http://placehold.it/32x32",
+  "age": 32,
+  "eyeColor": "blue",
+  "name": "Carrillo Horn",
+  "gender": "male",
+  "company": "ASSURITY",
+  "email": "carrillohorn@assurity.com",
+  "phone": "+1 (873) 511-2241",
+  "address": "758 Madoc Avenue, Idledale, Ohio, 6502",
+  "about": "Tempor duis sint esse eu ipsum irure reprehenderit.",
+  "registered": "2025-01-31T12:51:19 -00:00",
+  "latitude": 1.739611,
+  "longitude": -127.859992,
+  "tags": ["in", "qui", "quis", "ullamco"],
+  "friends": [
+    { "id": 0, "name": "Zimmerman Patel" },
+    { "id": 1, "name": "Cecile Rivers" }
+  ],
+  "greeting": "Hello, Carrillo Horn! You have 2 unread messages.",
+  "favoriteFruit": "banana"
+}`}
               spellCheck={false}
             />
           </div>

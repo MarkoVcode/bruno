@@ -139,3 +139,11 @@ export const onChatError = (callback) => {
     callback(data);
   });
 };
+
+/**
+ * Get available Copilot models
+ * @returns {Promise<Object>} List of available models
+ */
+export const getCopilotModels = () => {
+  return window.ipcRenderer.invoke('copilot:get-models');
+};

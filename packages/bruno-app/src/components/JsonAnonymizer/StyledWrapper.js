@@ -30,6 +30,49 @@ const StyledWrapper = styled.div`
     gap: 12px;
   }
 
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .model-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    label {
+      font-size: 13px;
+      color: ${(props) => props.theme.textSecondary};
+      font-weight: 500;
+    }
+
+    .model-select {
+      padding: 6px 12px;
+      border: 1px solid ${(props) => props.theme.border};
+      border-radius: 4px;
+      background: ${(props) => props.theme.bg};
+      color: ${(props) => props.theme.text};
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover:not(:disabled) {
+        border-color: ${(props) => props.theme.button.bg};
+      }
+
+      &:focus {
+        outline: none;
+        border-color: #4caf50;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+
   .title-icon {
     color: ${(props) => props.theme.text};
   }
