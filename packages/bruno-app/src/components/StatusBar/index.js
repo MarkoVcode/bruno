@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { IconSettings, IconCookie, IconTool, IconSearch, IconHistory, IconBrandGithubCopilot } from '@tabler/icons';
+import { IconSettings, IconCookie, IconTool, IconSearch, IconHistory, IconBrandGithubCopilot, IconShieldCheck } from '@tabler/icons';
 import Mousetrap from 'mousetrap';
 import { getKeyBindingsForActionAllOS } from 'providers/Hotkeys/keyMappings';
 import ToolHint from 'components/ToolHint';
@@ -129,6 +129,17 @@ const StatusBar = () => {
             <ToolHint text="Notifications" toolhintId="Notifications" place="top" offset={10}>
               <div className="status-bar-button">
                 <Notifications />
+              </div>
+            </ToolHint>
+
+            <ToolHint
+              text="Secure Connection: GitHub OAuth authentication uses HTTPS encryption and secure token storage"
+              toolhintId="Privacy Status"
+              place="top"
+              offset={10}
+            >
+              <div className="status-bar-button privacy-indicator">
+                <IconShieldCheck size={16} strokeWidth={1.5} aria-hidden="true" />
               </div>
             </ToolHint>
           </div>

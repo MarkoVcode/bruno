@@ -96,6 +96,22 @@ const StyledWrapper = styled.div`
       color: #9e9e9e;
     }
   }
+
+  .privacy-indicator {
+    color: #4caf50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+
+    svg {
+      filter: drop-shadow(0 0 2px rgba(76, 175, 80, 0.3));
+    }
+
+    &:hover {
+      color: #66bb6a;
+    }
+  }
 `;
 
 export default StyledWrapper; 
