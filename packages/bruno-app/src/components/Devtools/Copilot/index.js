@@ -66,9 +66,19 @@ const Copilot = () => {
 
   const handleStartAuth = async () => {
     try {
+      console.log('[Copilot Component] Starting authentication...');
       dispatch(copilotActions.startAuthentication());
 
-      const result = await startCopilotAuth();
+      // Add timeout to prevent hanging forever
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Authentication timeout - no response from server')), 60000));
+
+      const result = await Promise.race([
+        startCopilotAuth(),
+        timeoutPromise
+      ]);
+
+      console.log('[Copilot Component] Authentication result:', result);
 
       if (result.success) {
         dispatch(copilotActions.authenticationSuccess({
@@ -81,7 +91,7 @@ const Copilot = () => {
         }));
       }
     } catch (err) {
-      console.error('Authentication error:', err);
+      console.error('[Copilot Component] Authentication error:', err);
       dispatch(copilotActions.authenticationFailure({
         error: err.message || 'An unexpected error occurred'
       }));

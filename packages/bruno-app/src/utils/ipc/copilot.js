@@ -9,7 +9,16 @@
  * @returns {Promise<Object>} Authentication result
  */
 export const startCopilotAuth = () => {
-  return window.ipcRenderer.invoke('copilot:start-auth');
+  console.log('[IPC Utils] Invoking copilot:start-auth...');
+  return window.ipcRenderer.invoke('copilot:start-auth')
+    .then((result) => {
+      console.log('[IPC Utils] copilot:start-auth response:', result);
+      return result;
+    })
+    .catch((error) => {
+      console.error('[IPC Utils] copilot:start-auth error:', error);
+      throw error;
+    });
 };
 
 /**
