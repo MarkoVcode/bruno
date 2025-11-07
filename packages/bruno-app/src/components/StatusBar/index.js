@@ -23,10 +23,13 @@ const StatusBar = () => {
   const logs = useSelector((state) => state.logs.logs);
   const sidebarCollapsed = useSelector((state) => state.app.sidebarCollapsed);
   const isHistoryOpen = useSelector((state) => state.history.isHistoryOpen);
-  const { authenticated, hasCopilotAccess } = useSelector((state) => state.copilot);
+  const { authenticated, hasCopilotAccess, metadata } = useSelector((state) => state.copilot);
   const [cookiesOpen, setCookiesOpen] = useState(false);
   const { version } = useApp();
   const brunonReleaseTag = '';
+
+  // Detect Copilot tier based on organizations list
+  const hasBusinessTier = metadata?.organizations && metadata.organizations.length > 0;
 
   const errorCount = logs.filter(log => log.type === 'error').length;
 
@@ -132,16 +135,22 @@ const StatusBar = () => {
               </div>
             </ToolHint>
 
-            <ToolHint
-              text="Secure Connection: GitHub OAuth authentication uses HTTPS encryption and secure token storage"
-              toolhintId="Privacy Status"
-              place="top"
-              offset={10}
-            >
-              <div className="status-bar-button privacy-indicator">
-                <IconShieldCheck size={16} strokeWidth={1.5} aria-hidden="true" />
-              </div>
-            </ToolHint>
+            {authenticated && hasCopilotAccess && (
+              <ToolHint
+                text={
+                  hasBusinessTier
+                    ? 'Copilot Business/Enterprise: Your code is not used for training AI models. Enhanced privacy protection.'
+                    : 'Copilot Individual: Subject to GitHub Copilot terms. Code may be used for service improvement.'
+                }
+                toolhintId="Privacy Status"
+                place="top"
+                offset={10}
+              >
+                <div className={`status-bar-button privacy-indicator ${hasBusinessTier ? 'business-tier' : 'individual-tier'}`}>
+                  <IconShieldCheck size={16} strokeWidth={1.5} aria-hidden="true" />
+                </div>
+              </ToolHint>
+            )}
           </div>
         </div>
 

@@ -98,18 +98,33 @@ const StyledWrapper = styled.div`
   }
 
   .privacy-indicator {
-    color: #4caf50;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: default;
 
-    svg {
-      filter: drop-shadow(0 0 2px rgba(76, 175, 80, 0.3));
+    &.business-tier {
+      color: #4caf50;
+
+      svg {
+        filter: drop-shadow(0 0 2px rgba(76, 175, 80, 0.3));
+      }
+
+      &:hover {
+        color: #66bb6a;
+      }
     }
 
-    &:hover {
-      color: #66bb6a;
+    &.individual-tier {
+      color: #ffc107;
+
+      svg {
+        filter: drop-shadow(0 0 2px rgba(255, 193, 7, 0.2));
+      }
+
+      &:hover {
+        color: #ffca28;
+      }
     }
   }
 `;
