@@ -82,7 +82,9 @@ async function verifyCopilotAccess(token) {
       }
     });
 
-    return response.status === 200 && response.data;
+    // Return boolean indicating if user has Copilot access
+    // response.data contains Copilot features/capabilities but we only need to know if they have access
+    return response.status === 200 && !!response.data;
   } catch (error) {
     if (error.response?.status === 401 || error.response?.status === 403) {
       return false; // No Copilot access

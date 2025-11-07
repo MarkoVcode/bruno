@@ -82,8 +82,11 @@ const Copilot = () => {
 
       if (result.success) {
         dispatch(copilotActions.authenticationSuccess({
-          hasCopilotAccess: result.hasCopilotAccess,
-          metadata: result.metadata
+          // Ensure hasCopilotAccess is a boolean
+          hasCopilotAccess: typeof result.hasCopilotAccess === 'boolean'
+            ? result.hasCopilotAccess
+            : !!result.hasCopilotAccess,
+          metadata: result.copilotToken
         }));
       } else {
         dispatch(copilotActions.authenticationFailure({
