@@ -59,20 +59,16 @@ export const refreshCopilotToken = () => {
  * @returns {Function} Cleanup function to remove the listener
  */
 export const onVerificationRequired = (callback) => {
-  const handler = (event, data) => {
+  // Note: preload.js strips the event object, so we receive data directly
+  const handler = (data) => {
+    console.log('[IPC Utils] Verification event received, raw data:', data);
     callback(data);
   };
 
-  window.ipcRenderer.on('copilot:verification-required', handler);
+  const cleanup = window.ipcRenderer.on('copilot:verification-required', handler);
 
-  // Return cleanup function (use 'off' for newer Electron versions)
-  return () => {
-    if (window.ipcRenderer.off) {
-      window.ipcRenderer.off('copilot:verification-required', handler);
-    } else if (window.ipcRenderer.removeListener) {
-      window.ipcRenderer.removeListener('copilot:verification-required', handler);
-    }
-  };
+  // The preload.js returns a cleanup function directly
+  return cleanup;
 };
 
 /**
@@ -116,7 +112,8 @@ export const sendChatCompletionStream = ({ messages, model = 'gpt-4o', temperatu
  * @param {Function} callback - Callback function to handle each chunk
  */
 export const onChatChunk = (callback) => {
-  return window.ipcRenderer.on('copilot:chat-chunk', (event, data) => {
+  // Note: preload.js strips the event object, so we receive data directly
+  return window.ipcRenderer.on('copilot:chat-chunk', (data) => {
     callback(data);
   });
 };
@@ -126,6 +123,7 @@ export const onChatChunk = (callback) => {
  * @param {Function} callback - Callback function when streaming completes
  */
 export const onChatComplete = (callback) => {
+  // Note: preload.js strips the event object, so we receive data directly (none expected)
   return window.ipcRenderer.on('copilot:chat-complete', () => {
     callback();
   });
@@ -136,7 +134,8 @@ export const onChatComplete = (callback) => {
  * @param {Function} callback - Callback function to handle errors
  */
 export const onChatError = (callback) => {
-  return window.ipcRenderer.on('copilot:chat-error', (event, data) => {
+  // Note: preload.js strips the event object, so we receive data directly
+  return window.ipcRenderer.on('copilot:chat-error', (data) => {
     callback(data);
   });
 };
