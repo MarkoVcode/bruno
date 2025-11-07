@@ -178,12 +178,12 @@ const Copilot = () => {
                 <div className="verification-steps">
                   <ol>
                     <li>A browser window has opened to GitHub</li>
-                    <li>Enter the code below when prompted</li>
-                    <li>Authorize Bruno to access GitHub Copilot</li>
+                    <li>The verification code should be pre-filled automatically</li>
+                    <li>Click "Continue" and authorize Bruno to access GitHub Copilot</li>
                   </ol>
                 </div>
                 <div className="user-code">
-                  <div className="user-code-label">Verification Code:</div>
+                  <div className="user-code-label">Verification Code (if needed):</div>
                   <div className="user-code-value">{userCode}</div>
                 </div>
               </div>

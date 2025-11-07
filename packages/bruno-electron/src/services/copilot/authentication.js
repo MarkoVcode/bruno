@@ -34,8 +34,10 @@ async function startDeviceFlow(onVerificationUrl) {
           });
         }
 
-        // Open the verification URL in the default browser
-        await shell.openExternal(verification.verification_uri);
+        // Open the complete verification URL in the default browser
+        // This URL has the code pre-filled, so users don't need to enter it manually
+        const urlToOpen = verification.verification_uri_complete || verification.verification_uri;
+        await shell.openExternal(urlToOpen);
       }
     });
 
