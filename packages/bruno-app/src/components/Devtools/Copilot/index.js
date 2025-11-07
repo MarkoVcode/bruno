@@ -174,17 +174,36 @@ const Copilot = () => {
 
             {verificationUri && userCode && (
               <div className="verification-box">
-                <div className="verification-title">Complete Authentication</div>
-                <div className="verification-steps">
-                  <ol>
-                    <li>A browser window has opened to GitHub</li>
-                    <li>The verification code should be pre-filled automatically</li>
-                    <li>Click "Continue" and authorize Bruno to access GitHub Copilot</li>
-                  </ol>
+                <div className="verification-title">Complete Authentication in Browser</div>
+
+                <div className="user-code-prominent">
+                  <div className="user-code-label">Your Verification Code:</div>
+                  <div className="user-code-value-large">{userCode}</div>
+                  <div className="user-code-hint">Enter this code on the GitHub page that just opened</div>
                 </div>
-                <div className="user-code">
-                  <div className="user-code-label">Verification Code (if needed):</div>
-                  <div className="user-code-value">{userCode}</div>
+
+                <div className="verification-steps">
+                  <div className="verification-step">
+                    <strong>Step 1:</strong> A browser window should have opened to GitHub
+                  </div>
+                  <div className="verification-step">
+                    <strong>Step 2:</strong> Enter the code above when prompted (it may auto-fill)
+                  </div>
+                  <div className="verification-step">
+                    <strong>Step 3:</strong> Click "Continue" and authorize BrunoN
+                  </div>
+                </div>
+
+                <div className="verification-link">
+                  <span>Browser didn't open? </span>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault(); window.open(verificationUri);
+                  }}
+                  >
+                    Click here to open GitHub
+                  </a>
                 </div>
               </div>
             )}

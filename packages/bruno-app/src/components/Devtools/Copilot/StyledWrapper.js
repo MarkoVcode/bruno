@@ -139,19 +139,77 @@ const StyledWrapper = styled.div`
     color: ${(props) => props.theme.text};
   }
 
+  .user-code-prominent {
+    padding: 20px;
+    background: ${(props) => props.theme.console.bg};
+    border: 2px solid #4caf50;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .user-code-label {
+    font-size: 13px;
+    color: ${(props) => props.theme.textSecondary};
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .user-code-value-large {
+    font-size: 32px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    color: #4caf50;
+    letter-spacing: 8px;
+    margin: 12px 0;
+    padding: 12px;
+    background: rgba(76, 175, 80, 0.1);
+    border-radius: 6px;
+    user-select: all;
+  }
+
+  .user-code-hint {
+    font-size: 12px;
+    color: ${(props) => props.theme.textSecondary};
+    margin-top: 8px;
+  }
+
   .verification-steps {
     font-size: 13px;
     color: ${(props) => props.theme.textSecondary};
-    line-height: 1.8;
+    line-height: 1.6;
     margin-bottom: 16px;
+  }
 
-    ol {
-      padding-left: 20px;
-      margin: 0;
+  .verification-step {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: ${(props) => props.theme.console.bg};
+    border-left: 3px solid ${(props) => props.theme.console.border};
+    border-radius: 4px;
+
+    strong {
+      color: ${(props) => props.theme.text};
     }
+  }
 
-    li {
-      margin-bottom: 8px;
+  .verification-link {
+    font-size: 13px;
+    color: ${(props) => props.theme.textSecondary};
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid ${(props) => props.theme.console.border};
+
+    a {
+      color: #4caf50;
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
 
@@ -164,12 +222,6 @@ const StyledWrapper = styled.div`
     border: 1px solid ${(props) => props.theme.console.border};
     border-radius: 6px;
     margin-top: 12px;
-  }
-
-  .user-code-label {
-    font-size: 12px;
-    color: ${(props) => props.theme.textSecondary};
-    font-weight: 500;
   }
 
   .user-code-value {

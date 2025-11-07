@@ -25,6 +25,13 @@ async function startDeviceFlow(onVerificationUrl) {
       clientId: GITHUB_OAUTH_CLIENT_ID,
       scopes: GITHUB_OAUTH_SCOPES,
       onVerification: async (verification) => {
+        console.log('GitHub OAuth Device Flow verification data:', {
+          verification_uri: verification.verification_uri,
+          verification_uri_complete: verification.verification_uri_complete,
+          user_code: verification.user_code,
+          expires_in: verification.expires_in
+        });
+
         // Call callback with verification URL and user code
         if (onVerificationUrl) {
           onVerificationUrl({
@@ -37,6 +44,7 @@ async function startDeviceFlow(onVerificationUrl) {
         // Open the complete verification URL in the default browser
         // This URL has the code pre-filled, so users don't need to enter it manually
         const urlToOpen = verification.verification_uri_complete || verification.verification_uri;
+        console.log('Opening URL:', urlToOpen);
         await shell.openExternal(urlToOpen);
       }
     });
