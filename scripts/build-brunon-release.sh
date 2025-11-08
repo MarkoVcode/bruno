@@ -34,8 +34,7 @@ npm run build:web
 # Step 3: Prepare Electron web assets
 echo "Preparing Electron web assets..."
 
-# Remove old build directories
-rm -rf packages/bruno-electron/out
+# Remove old web directory (not out/ to preserve artifacts from other platforms)
 rm -rf packages/bruno-electron/web
 
 # Copy web build

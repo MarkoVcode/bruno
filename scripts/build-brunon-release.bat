@@ -36,8 +36,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 REM Step 3: Prepare Electron web assets
 echo Preparing Electron web assets...
 
-REM Remove old build directories
-if exist packages\bruno-electron\out rmdir /s /q packages\bruno-electron\out
+REM Remove old web directory (not out\ to preserve artifacts from other platforms)
 if exist packages\bruno-electron\web rmdir /s /q packages\bruno-electron\web
 
 REM Copy web build
